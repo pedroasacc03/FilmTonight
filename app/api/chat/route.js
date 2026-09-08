@@ -1,5 +1,11 @@
-// GET  /api/chat - fetch chat history for the Chatbot page
-// POST /api/chat - send a message, run the tool-use loop, get a reply
+// GET    /api/chat - fetch chat history for the Chatbot page
+// POST   /api/chat - send a message, run the tool-use loop, get a reply
+// DELETE /api/chat - clear chat history (both the visible transcript AND the
+//        AI's memory of it - see lib/chat.js handleChatMessage, which reads
+//        the last 16 ChatMessage rows as conversation context on every
+//        message, so this has to actually delete the rows, not just hide
+//        them client-side, or the "cleared" conversation would still be
+//        remembered on the next message)
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserFromRequest } from "@/lib/session";
@@ -44,4 +50,17 @@ export async function POST(request) {
     console.error("Chat failed:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
+}
+
+export async function DELETE(request) {
+  const user = await getCurrentUserFromRequest(request);
+  if (!user) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
+
+  await prisma.chatMessage.deleteMany({ where: { userId: user.id } });
+
+  trackEvent(user.id, "chat_cleared").catch((err) => {
+    console.error("Failed to track chat_cleared:", err.message);
+  });
+
+  return NextResponse.json({ ok: true });
 }

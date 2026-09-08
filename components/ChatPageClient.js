@@ -15,6 +15,13 @@ export default function ChatPageClient({ initialMessages }) {
   const [error, setError] = useState("");
   const windowRef = useRef(null);
 
+  // "Clear chat" asks for confirmation first - same reasoning as deleting a
+  // rating elsewhere in the app: it's destructive (wipes the AI's memory of
+  // the conversation too, not just what's on screen - see the DELETE
+  // handler's comment in app/api/chat/route.js) and can't be undone.
+  const [confirmingClear, setConfirmingClear] = useState(false);
+  const [clearing, setClearing] = useState(false);
+
   useEffect(() => {
     if (windowRef.current) {
       windowRef.current.scrollTop = windowRef.current.scrollHeight;
@@ -46,8 +53,53 @@ export default function ChatPageClient({ initialMessages }) {
     }
   }
 
+  async function confirmClear() {
+    setClearing(true);
+    setError("");
+    try {
+      const res = await fetch("/api/chat", { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || "Could not clear the chat.");
+      setMessages([]);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setClearing(false);
+      setConfirmingClear(false);
+    }
+  }
+
   return (
     <>
+      {messages.length > 0 && (
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 8 }}>
+          <button className="btn btn-outline" onClick={() => setConfirmingClear(true)}>
+            Clear chat
+          </button>
+        </div>
+      )}
+
+      {confirmingClear && (
+        <div className="modal-backdrop" onClick={() => !clearing && setConfirmingClear(false)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <h3 style={{ marginTop: 0 }}>Clear this conversation?</h3>
+            <p className="muted" style={{ marginBottom: 16 }}>
+              This deletes the whole chat history - not just what&apos;s on screen. The AI won&apos;t remember
+              anything from this conversation afterward. Your ratings, wishlist, and taste profile aren&apos;t
+              affected. This can&apos;t be undone.
+            </p>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+              <button className="btn btn-danger-outline" onClick={confirmClear} disabled={clearing}>
+                {clearing ? "Clearing..." : "Clear chat"}
+              </button>
+              <button className="btn btn-outline" onClick={() => setConfirmingClear(false)} disabled={clearing}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="chat-window" ref={windowRef}>
         {messages.length === 0 && (
           <div className="chat-bubble assistant">
