@@ -856,6 +856,20 @@ textarea {
   color: var(--color-neutral-700);
   border-top: 1px solid var(--color-divider);
 }
+/* Global TMDB/OMDb attribution - see app/layout.js for why this is here
+   rather than per-page. Deliberately small/quiet (it's a compliance
+   notice, not a feature), but always present. */
+.app-footer {
+  text-align: center;
+  padding: 14px;
+  font-size: 11px;
+  color: var(--color-neutral-700);
+  border-top: 1px solid var(--color-divider);
+}
+.app-footer a {
+  color: var(--color-neutral-700);
+  text-decoration: underline;
+}
 @media (max-width: 700px) {
   .landing-steps { grid-template-columns: 1fr; }
   .landing-feature-grid { grid-template-columns: 1fr; }
