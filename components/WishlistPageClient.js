@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import TitlePoster from "@/components/TitlePoster";
 import TitleMeta from "@/components/TitleMeta";
 import StreamingInfo from "@/components/StreamingInfo";
 import Toast from "@/components/Toast";
@@ -162,23 +163,30 @@ export default function WishlistPageClient({ initialWishlist, userRegion }) {
 
       {selectedTitle && (
         <div className="card">
-          <h3 style={{ margin: "0 0 4px" }}>
-            {selectedTitle.name} {selectedTitle.year ? `(${selectedTitle.year})` : ""}
-          </h3>
-          <TitleMeta title={selectedTitle} />
-          <p className="muted">{selectedTitle.genres?.join(" / ") || "Genres unknown"}</p>
-          <StreamingInfo title={selectedTitle} userRegion={userRegion} />
+          <div className="detail-row">
+            <div className="detail-poster">
+              <TitlePoster title={selectedTitle} />
+            </div>
+            <div className="detail-body">
+              <h3 style={{ margin: "0 0 4px" }}>
+                {selectedTitle.name} {selectedTitle.year ? `(${selectedTitle.year})` : ""}
+              </h3>
+              <TitleMeta title={selectedTitle} />
+              <p className="muted">{selectedTitle.genres?.join(" / ") || "Genres unknown"}</p>
+              <StreamingInfo title={selectedTitle} userRegion={userRegion} />
 
-          <button className="btn btn-success" onClick={confirmAddToWishlist} disabled={adding}>
-            {adding ? "Adding..." : "Add to Wishlist"}
-          </button>
+              <button className="btn btn-success" onClick={confirmAddToWishlist} disabled={adding}>
+                {adding ? "Adding..." : "Add to Wishlist"}
+              </button>
 
-          <SearchRefineHint
-            candidates={candidates}
-            loadingCandidates={loadingCandidates}
-            onShowOtherMatches={showOtherMatches}
-            onSelectCandidate={selectCandidate}
-          />
+              <SearchRefineHint
+                candidates={candidates}
+                loadingCandidates={loadingCandidates}
+                onShowOtherMatches={showOtherMatches}
+                onSelectCandidate={selectCandidate}
+              />
+            </div>
+          </div>
         </div>
       )}
 
@@ -190,6 +198,9 @@ export default function WishlistPageClient({ initialWishlist, userRegion }) {
       ) : (
         wishlist.map((item) => (
           <div key={item.id} className="rec-card">
+            <div className="poster">
+              <TitlePoster title={item.title} />
+            </div>
             <div className="body">
               <h3 style={{ margin: "0 0 4px" }}>
                 {item.title.name} {item.title.year ? `(${item.title.year})` : ""}

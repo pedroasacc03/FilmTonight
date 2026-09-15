@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import TitlePoster from "@/components/TitlePoster";
 import TitleMeta from "@/components/TitleMeta";
 import StreamingInfo from "@/components/StreamingInfo";
 import Toast from "@/components/Toast";
@@ -311,6 +312,9 @@ export default function RecommendationsPageClient({ initialRecommendations, init
           const badge = SOURCE_BADGES[rec.source] || SOURCE_BADGES.ai_new;
           return (
             <div key={rec.id} className="rec-card">
+              <div className="poster">
+                <TitlePoster title={rec.title} />
+              </div>
               <div className="body">
                 <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                   <h3 style={{ margin: 0 }}>

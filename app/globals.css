@@ -333,6 +333,31 @@ code {
   flex: 1 1 160px;
   max-width: 180px;
 }
+/* Matted "plate" treatment - every poster/photo sits inside a warm archival
+   mat like a tipped-in book plate, per the Classical design system. Falls
+   back to name-only text when there's no poster (or it fails to load) - see
+   components/TitlePoster.js. */
+.title-poster-placeholder {
+  background: var(--color-neutral-300);
+  border-radius: 0;
+  aspect-ratio: 2 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-neutral-700);
+  font-size: 13px;
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 6px solid var(--color-surface);
+  outline: 1px solid var(--color-divider);
+  outline-offset: -1px;
+}
+.title-poster-placeholder img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: sepia(0.22) saturate(0.82) contrast(1.05);
+}
 .title-mini-card {
   background: transparent;
   border: 1px solid var(--color-divider);
@@ -363,6 +388,9 @@ code {
   padding: 16px;
   margin-bottom: 16px;
 }
+.rec-card .poster {
+  flex: 0 0 100px;
+}
 .rec-card .body {
   flex: 1;
   min-width: 0;
@@ -380,6 +408,31 @@ code {
   padding: 10px 12px;
   font-size: 13px;
   margin-top: 8px;
+}
+
+/* --- Detail row (poster + form/details side by side) - Ratings' "Rate a
+   Title" panel and Wishlist's "Add to Wishlist" panel. Stacks on narrow
+   screens instead of squeezing the poster and the star rating/why-textarea/
+   save button into a sliver of space next to it. --- */
+.detail-row {
+  display: flex;
+  gap: 20px;
+}
+.detail-row .detail-poster {
+  flex: 0 0 120px;
+}
+.detail-row .detail-body {
+  flex: 1;
+  min-width: 0;
+}
+@media (max-width: 560px) {
+  .detail-row {
+    flex-direction: column;
+  }
+  .detail-row .detail-poster {
+    flex: 0 0 auto;
+    width: 140px;
+  }
 }
 
 

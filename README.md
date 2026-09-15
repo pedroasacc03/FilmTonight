@@ -174,8 +174,9 @@ cinematch/
     NotInterestedModal.js            - shared "why not interested?" prompt (Recommendations + Wishlist)
     RateModal.js                     - shared "rate it now" prompt on Mark Watched (Recommendations + Wishlist)
     Toast.js                         - shared save/action confirmation toast
-    StarRating.js, TitleMeta.js      - shared title-display building blocks (no poster/image component -
-                                        see "What's already working" below for why)
+    StarRating.js, TitleMeta.js,
+    TitlePoster.js                   - shared title-display building blocks (TitlePoster shows a real TMDB
+                                        poster, falling back to a name-only card - see "What's already working")
   lib/
     prisma.js                        - shared Prisma Client instance
     auth.js, session.js              - password hashing, session tokens, "who's logged in"
@@ -367,11 +368,19 @@ isn't local to the app server anymore.
   `recommend_title` tool alike.
 - Shared "Not Interested" reason prompt (Recommendations + Wishlist) —
   captured as a strong negative signal, on par with a 1-star rating
-- Titles are shown as name-only cards, deliberately with no poster/cover
-  image. An AI web-search lookup for poster URLs was tried and dropped -
-  verified against real data, only ~1 in 66 cached titles ever had a poster
-  that actually loaded, and the AI fabricated plausible-looking-but-fake
-  URLs even when told to only return a real, direct image link.
+- Title cards show a real poster image (`TitlePoster.js`, from TMDB's
+  `poster_path`), falling back to a name-only card when there isn't one or
+  it fails to load. This used to be name-only unconditionally: an earlier
+  AI-web-search-based lookup fabricated plausible-looking poster URLs that
+  mostly 404'd (verified against real data: only ~1 of 66 cached titles ever
+  had one that actually loaded), so posters were dropped app-wide rather
+  than show a broken image most of the time. TMDB's `poster_path` is a real,
+  verified field in the same response already fetched for genres/cast/etc -
+  not a guess - so this is reliable now (verified live: a fresh lookup's
+  poster URL actually loads a real image). Any `Title` row cached before
+  this changed only picks up a poster on its next natural 30-day refresh
+  unless backfilled - see `backfillMissingPosters` in `lib/titles.js` and
+  the one-off "Backfill posters" button on `/admin/metrics`.
 - AI Preference Analysis Engine: builds/updates a profile from a user's
   **entire** rating history (no cap - a title's genres and a short plot
   synopsis are part of that signal now too, alongside stars/why/runtime/

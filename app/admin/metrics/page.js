@@ -19,6 +19,7 @@ import { prisma } from "@/lib/prisma";
 import { EVENT_NAMES } from "@/lib/events";
 import { LANDING_VARIANTS } from "@/lib/landingVariants";
 import NavBar from "@/components/NavBar";
+import AdminPosterBackfillButton from "@/components/AdminPosterBackfillButton";
 
 const EVENT_LABELS = {
   [EVENT_NAMES.SIGNUP]: "Signed up",
@@ -146,10 +147,11 @@ export default async function AdminMetricsPage() {
   // verified from outside the deployed container (SQLite lives on its
   // volume, not a networked DB - see the README's SQLite/deploy notes).
   // Remove this card once that's confirmed.
-  const [totalTitles, titlesMissingOverview, titlesMissingGenres, oldestTitle] = await Promise.all([
+  const [totalTitles, titlesMissingOverview, titlesMissingGenres, titlesMissingPoster, oldestTitle] = await Promise.all([
     prisma.title.count(),
     prisma.title.count({ where: { overview: null } }),
     prisma.title.count({ where: { genres: "[]" } }),
+    prisma.title.count({ where: { posterUrl: null } }),
     prisma.title.findFirst({ orderBy: { lastRefreshed: "asc" }, select: { name: true, lastRefreshed: true } }),
   ]);
 
@@ -277,9 +279,11 @@ export default async function AdminMetricsPage() {
         <div className="card">
           <h2>Title data health (temporary)</h2>
           <p className="muted">
-            One-off check on whether cached titles actually have genres/overview populated in THIS database -
-            remove this card once confirmed. See lib/profile.js for why that data matters (it now feeds the AI
-            Preference Analysis Engine).
+            One-off check on whether cached titles actually have genres/overview/posters populated in THIS
+            database - remove this card once confirmed. See lib/profile.js for why genres/overview matter (AI
+            Preference Analysis Engine signal) and lib/titles.js for the poster backfill button below (posters
+            used to always be null - any title cached before that changed only gets one on its next natural
+            30-day refresh, unless backfilled now).
           </p>
           <ul style={{ marginTop: 12 }}>
             <li>Total cached titles: <strong>{totalTitles}</strong></li>
@@ -291,6 +295,10 @@ export default async function AdminMetricsPage() {
               Missing genres: <strong>{titlesMissingGenres}</strong>{" "}
               <span className="muted">({pct(titlesMissingGenres, totalTitles)})</span>
             </li>
+            <li>
+              Missing poster: <strong>{titlesMissingPoster}</strong>{" "}
+              <span className="muted">({pct(titlesMissingPoster, totalTitles)})</span>
+            </li>
             {oldestTitle && (
               <li>
                 Oldest cached title: <strong>{oldestTitle.name}</strong>, last refreshed{" "}
@@ -298,6 +306,7 @@ export default async function AdminMetricsPage() {
               </li>
             )}
           </ul>
+          <AdminPosterBackfillButton />
         </div>
 
         <div className="card">

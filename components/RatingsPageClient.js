@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import StarRating from "@/components/StarRating";
+import TitlePoster from "@/components/TitlePoster";
 import TitleMeta from "@/components/TitleMeta";
 import Toast from "@/components/Toast";
 import { useToast } from "@/lib/useToast";
@@ -163,36 +164,43 @@ export default function RatingsPageClient({ guidedQuestions }) {
 
       {selectedTitle && (
         <div className="card">
-          <h3 style={{ margin: "0 0 4px" }}>
-            {selectedTitle.name} {selectedTitle.year ? `(${selectedTitle.year})` : ""}
-          </h3>
-          <TitleMeta title={selectedTitle} />
-          <p className="muted">{selectedTitle.genres?.join(" / ") || "Genres unknown"}</p>
+          <div className="detail-row">
+            <div className="detail-poster">
+              <TitlePoster title={selectedTitle} />
+            </div>
+            <div className="detail-body">
+              <h3 style={{ margin: "0 0 4px" }}>
+                {selectedTitle.name} {selectedTitle.year ? `(${selectedTitle.year})` : ""}
+              </h3>
+              <TitleMeta title={selectedTitle} />
+              <p className="muted">{selectedTitle.genres?.join(" / ") || "Genres unknown"}</p>
 
-          <label>Your rating</label>
-          <div style={{ marginBottom: 14 }}>
-            <StarRating value={stars} onChange={setStars} />
+              <label>Your rating</label>
+              <div style={{ marginBottom: 14 }}>
+                <StarRating value={stars} onChange={setStars} />
+              </div>
+
+              <label htmlFor="why">Why? (optional — more detail helps the AI more)</label>
+              <textarea
+                id="why"
+                placeholder="e.g. The slow-burn tension and morally grey characters got me - the ambiguous ending fit the tone perfectly."
+                value={why}
+                onChange={(e) => setWhy(e.target.value)}
+              />
+
+              <button className="btn btn-success" onClick={handleSave} disabled={saving}>
+                {saving ? "Saving..." : "Save Rating"}
+              </button>
+              {saveMessage && <p className="error-text" style={{ marginTop: 10 }}>{saveMessage}</p>}
+
+              <SearchRefineHint
+                candidates={candidates}
+                loadingCandidates={loadingCandidates}
+                onShowOtherMatches={showOtherMatches}
+                onSelectCandidate={selectCandidate}
+              />
+            </div>
           </div>
-
-          <label htmlFor="why">Why? (optional — more detail helps the AI more)</label>
-          <textarea
-            id="why"
-            placeholder="e.g. The slow-burn tension and morally grey characters got me - the ambiguous ending fit the tone perfectly."
-            value={why}
-            onChange={(e) => setWhy(e.target.value)}
-          />
-
-          <button className="btn btn-success" onClick={handleSave} disabled={saving}>
-            {saving ? "Saving..." : "Save Rating"}
-          </button>
-          {saveMessage && <p className="error-text" style={{ marginTop: 10 }}>{saveMessage}</p>}
-
-          <SearchRefineHint
-            candidates={candidates}
-            loadingCandidates={loadingCandidates}
-            onShowOtherMatches={showOtherMatches}
-            onSelectCandidate={selectCandidate}
-          />
         </div>
       )}
 

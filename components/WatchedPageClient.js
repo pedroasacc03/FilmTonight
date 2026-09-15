@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import StarRating from "@/components/StarRating";
+import TitlePoster from "@/components/TitlePoster";
 import TitleMeta from "@/components/TitleMeta";
 import Toast from "@/components/Toast";
 import { useToast } from "@/lib/useToast";
@@ -48,6 +49,9 @@ function WatchedRow({ item, onSaved, onRequestDelete }) {
 
   return (
     <div className="rec-card">
+      <div className="poster">
+        <TitlePoster title={item.title} />
+      </div>
       <div className="body">
         <h3 style={{ margin: "0 0 4px" }}>
           {item.title.name} {item.title.year ? `(${item.title.year})` : ""}

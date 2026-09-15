@@ -10,6 +10,7 @@ import { listWishlist } from "@/lib/recommendations";
 import { trackPageView } from "@/lib/events";
 import { RATINGS_GOAL, RECOMMENDED_RATINGS_GOAL } from "@/lib/questions";
 import NavBar from "@/components/NavBar";
+import TitlePoster from "@/components/TitlePoster";
 
 export default async function HomePage() {
   const user = await requireUser();
@@ -110,6 +111,7 @@ export default async function HomePage() {
           <div className="title-grid">
             {wishlistPreview.map((item) => (
               <div key={item.id} className="title-mini-card">
+                <TitlePoster title={item.title} />
                 <div className="info">
                   <div className="name">{item.title.name}</div>
                   <div className="meta">
