@@ -286,6 +286,7 @@ real persistent disk and a long-running Node process.
    - `OMDB_API_KEY` - your real key (optional - only RT/IMDb scores depend on it).
    - `AUTH_SECRET` - a **fresh** random value, never the one in your local `.env` (generate with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`).
    - `CLAUDE_PROFILE_MODEL` - same as local, or your preferred model.
+   - `SITE_URL` - your real public URL (Railway assigns one in step 6 below, or your custom domain) - social share previews (og:image etc.) resolve to the wrong place without this.
    - `ADMIN_EMAILS` - whichever account(s) should see `/admin/metrics`.
    - `DATABASE_URL` - pointed at the volume, e.g. `file:/data/dev.db` (must match wherever you mounted the volume in step 3).
 5. Run `npx prisma db push` once against the deployed environment to create the schema on that fresh database file (Railway's CLI supports running one-off commands against a deployed service - `railway run npx prisma db push` after `railway login` and `railway link`).
@@ -382,6 +383,14 @@ isn't local to the app server anymore.
   every page
 - Privacy Policy and Terms of Service pages with real operator/contact
   details, not placeholder text
+- Proper Open Graph / Twitter Card meta tags (`app/layout.js`) - a shared
+  link on LinkedIn, Slack, an Instagram bio, etc. gets a real title,
+  description, and preview image instead of a blank/generic card.
+  `app/opengraph-image.js` generates that image at request time (via
+  `next/og`, not a static file), so the headline shown in it can never
+  drift out of sync with the real one. Needs `SITE_URL` set to the real
+  public domain in production or the image/URL tags resolve to the wrong
+  place - see the deploy steps below.
 - Big, clear confirmation toasts (`Toast.js` / `useToast.js`) after every
   save-worthy action (rating saved, preferences updated, recommendation
   triaged, etc.), each with a short line of guidance on where to find the
