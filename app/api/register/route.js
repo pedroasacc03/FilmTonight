@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, createSessionToken, SESSION_COOKIE_NAME, SESSION_MAX_AGE_SECONDS } from "@/lib/auth";
 import { trackEvent } from "@/lib/events";
-import { LANDING_VARIANTS } from "@/lib/landingVariants";
 
 export async function POST(request) {
   const body = await request.json().catch(() => null);
@@ -11,9 +10,6 @@ export async function POST(request) {
   const password = body?.password;
   const name = body?.name?.trim() || null;
   const consent = body?.consent === true;
-  // Only ever a known landing-page slug (see app/lp/[variant]) - never
-  // trusted/stored as arbitrary client-supplied text.
-  const landingVariant = LANDING_VARIANTS[body?.landingVariant] ? body.landingVariant : null;
 
   if (!email || !password) {
     return NextResponse.json({ error: "Email and password are required." }, { status: 400 });
@@ -41,7 +37,7 @@ export async function POST(request) {
   });
 
   // Never let an event-tracking hiccup break registration itself.
-  trackEvent(user.id, "signup", landingVariant ? { landingVariant } : undefined).catch((err) => {
+  trackEvent(user.id, "signup").catch((err) => {
     console.error("Failed to track signup event:", err.message);
   });
 

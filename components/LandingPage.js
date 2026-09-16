@@ -1,40 +1,18 @@
-// The actual landing-page markup and behavior, shared by two callers:
-//   - app/page.js renders this at "/" using the default pitch (see
-//     lib/landingVariants.js DEFAULT_LANDING_VARIANT) - the site's front
-//     door, what a brand-new visitor sees before login/register.
-//   - app/lp/[variant]/page.js renders this at /lp/<variant> for pointing a
-//     specific outbound link/campaign at one exact pitch, regardless of
-//     what the current default is.
-// Both pass a `variantSlug` - a valid key in LANDING_VARIANTS - and get
-// identical behavior: redirect a signed-in visitor straight to /home,
-// record a "landing_view" event, and render the pitch. The caller is
-// responsible for validating the slug (e.g. 404ing) before rendering this;
-// it assumes `variantSlug` is already valid.
-//
-// Every "Get started" link carries ?ref=<variant> through to /register,
-// which threads it into the signup event's metadata (see
-// app/register/page.js and app/api/register/route.js) - that's what lets
-// app/admin/metrics/page.js show views vs. signups per variant, whether the
-// visit came from "/" or an explicit /lp/<variant> link.
+// The marketing landing page's markup and behavior, rendered at "/" (the
+// site's front door - what a brand-new visitor sees before login/register).
+// This used to be one of 3 A/B-tested pitch variants (see git history for
+// lib/landingVariants.js and app/lp/[variant]) - simplified down to just
+// this one ("pain-led": the decision-fatigue angle) once there was no
+// longer a real need to keep testing multiple pitches against each other.
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
-import { trackAnonymousEvent } from "@/lib/events";
-import { LANDING_VARIANTS } from "@/lib/landingVariants";
 
-export default async function LandingPage({ variantSlug }) {
-  const variant = LANDING_VARIANTS[variantSlug];
-
+export default async function LandingPage() {
   // A signed-in visitor doesn't need the pitch - send them straight in.
   const user = await getCurrentUser();
   if (user) redirect("/home");
-
-  await trackAnonymousEvent("landing_view", { variant: variantSlug }).catch((err) => {
-    console.error("Failed to track landing_view:", err.message);
-  });
-
-  const registerHref = `/register?ref=${variantSlug}`;
 
   return (
     <div>
@@ -44,10 +22,13 @@ export default async function LandingPage({ variantSlug }) {
       </div>
 
       <div className="landing-hero">
-        <h1>{variant.headline}</h1>
-        <p>{variant.subhead}</p>
+        <h1>Stop wasting 5 days a year deciding what to watch.</h1>
+        <p>
+          Just 20 minutes a day spent browsing adds up to 5 days a year, gone. CineMatch narrows it down to a
+          handful of picks that actually fit you, in seconds.
+        </p>
         <div className="landing-cta-row">
-          <Link href={registerHref} className="btn btn-primary">
+          <Link href="/register" className="btn btn-primary">
             Get started free
           </Link>
           <Link href="/login" className="btn btn-outline">
@@ -107,8 +88,8 @@ export default async function LandingPage({ variantSlug }) {
       </div>
 
       <div className="landing-cta-section">
-        <h2>{variant.headline}</h2>
-        <Link href={registerHref} className="btn btn-primary">
+        <h2>Stop wasting 5 days a year deciding what to watch.</h2>
+        <Link href="/register" className="btn btn-primary">
           Get started free
         </Link>
       </div>

@@ -17,13 +17,11 @@ import { requireUser } from "@/lib/session";
 import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { EVENT_NAMES } from "@/lib/events";
-import { LANDING_VARIANTS } from "@/lib/landingVariants";
 import NavBar from "@/components/NavBar";
 import AdminPosterBackfillButton from "@/components/AdminPosterBackfillButton";
 
 const EVENT_LABELS = {
   [EVENT_NAMES.SIGNUP]: "Signed up",
-  [EVENT_NAMES.LANDING_VIEW]: "Landing page viewed",
   [EVENT_NAMES.FIRST_RATING]: "First rating",
   [EVENT_NAMES.ACTIVATED_10_WATCHED]: "Activated (10 watched)",
   [EVENT_NAMES.ACTIVE_DAY]: "Active day",
@@ -115,15 +113,13 @@ export default async function AdminMetricsPage() {
     activeLast7Groups,
     pageViewEvents,
     featureEventCounts,
-    landingViewEvents,
-    attributedSignupEvents,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.rating.groupBy({ by: ["userId"], where: { status: "watched" }, _count: { _all: true } }),
-    // page_view/active_day/landing_view are excluded here - they'd flood out
-    // everything else in a "last 30" feed (they all have their own cards).
+    // page_view/active_day are excluded here - they'd flood out everything
+    // else in a "last 30" feed (they both have their own cards).
     prisma.event.findMany({
-      where: { name: { notIn: [EVENT_NAMES.PAGE_VIEW, EVENT_NAMES.ACTIVE_DAY, EVENT_NAMES.LANDING_VIEW] } },
+      where: { name: { notIn: [EVENT_NAMES.PAGE_VIEW, EVENT_NAMES.ACTIVE_DAY] } },
       orderBy: { createdAt: "desc" },
       take: 30,
       include: { user: { select: { email: true } } },
@@ -137,8 +133,6 @@ export default async function AdminMetricsPage() {
     prisma.event.groupBy({ by: ["userId"], where: { name: EVENT_NAMES.ACTIVE_DAY, createdAt: { gte: sevenDaysAgo } } }),
     prisma.event.findMany({ where: { name: EVENT_NAMES.PAGE_VIEW }, select: { metadata: true } }),
     prisma.event.groupBy({ by: ["name"], where: { name: { in: FEATURE_EVENT_NAMES } }, _count: { _all: true } }),
-    prisma.event.findMany({ where: { name: EVENT_NAMES.LANDING_VIEW }, select: { metadata: true } }),
-    prisma.event.findMany({ where: { name: EVENT_NAMES.SIGNUP, metadata: { not: null } }, select: { metadata: true } }),
   ]);
 
   // TEMPORARY diagnostic - added to check whether production's actual Title
@@ -172,36 +166,6 @@ export default async function AdminMetricsPage() {
   const pageViewRows = Object.entries(pageViewCounts).sort((a, b) => b[1] - a[1]);
 
   const featureCountsMap = Object.fromEntries(featureEventCounts.map((e) => [e.name, e._count._all]));
-
-  // Landing-page performance: views per variant (from anonymous landing_view
-  // events) vs. signups attributed to that variant (from the signup event's
-  // landingVariant metadata, set only when someone actually clicked through
-  // - see app/register/page.js). A signup with no ?ref= (direct navigation,
-  // not from a landing page) isn't attributed to any variant and is excluded.
-  const landingViewCounts = {};
-  for (const e of landingViewEvents) {
-    try {
-      const { variant } = JSON.parse(e.metadata || "{}");
-      if (variant) landingViewCounts[variant] = (landingViewCounts[variant] || 0) + 1;
-    } catch {
-      // malformed metadata - skip
-    }
-  }
-  const landingSignupCounts = {};
-  for (const e of attributedSignupEvents) {
-    try {
-      const { landingVariant } = JSON.parse(e.metadata || "{}");
-      if (landingVariant) landingSignupCounts[landingVariant] = (landingSignupCounts[landingVariant] || 0) + 1;
-    } catch {
-      // malformed metadata - skip
-    }
-  }
-  const landingRows = Object.keys(LANDING_VARIANTS).map((variant) => ({
-    variant,
-    headline: LANDING_VARIANTS[variant].headline,
-    views: landingViewCounts[variant] || 0,
-    signups: landingSignupCounts[variant] || 0,
-  }));
 
   // Time-to-activation: only computable for accounts that both signed up
   // AND activated after event tracking shipped (both events need to exist).
@@ -307,34 +271,6 @@ export default async function AdminMetricsPage() {
             )}
           </ul>
           <AdminPosterBackfillButton />
-        </div>
-
-        <div className="card">
-          <h2>Landing page performance</h2>
-          <p className="muted">
-            Views per pitch (from /lp/&lt;variant&gt;) vs. signups attributed to it via the CTA&apos;s{" "}
-            <code>?ref=</code> link. A signup that didn&apos;t come from one of these pages isn&apos;t counted here.
-          </p>
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Pitch</th>
-                <th>Views</th>
-                <th>Signups</th>
-                <th>Conversion</th>
-              </tr>
-            </thead>
-            <tbody>
-              {landingRows.map((row) => (
-                <tr key={row.variant}>
-                  <td>&quot;{row.headline}&quot;</td>
-                  <td>{row.views}</td>
-                  <td>{row.signups}</td>
-                  <td>{pct(row.signups, row.views)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
 
         <div className="card">

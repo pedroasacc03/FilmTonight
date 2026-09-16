@@ -158,15 +158,14 @@ an AI coding assistant to extend later.
 ```
 cinematch/
   app/
-    lp/[variant]/                              - marketing landing page (3 pitch variants, see below)
     login/, register/                          - auth pages
     home/, ratings/, watched/, wishlist/,
     recommendations/, preferences/, chat/       - the 7 main pages
     api/                                        - backend route handlers (one folder per resource)
-    layout.js, page.js, globals.css             - page.js is "/" itself - renders the landing page (see below)
+    layout.js, page.js, globals.css             - page.js is "/" itself - renders the landing page
   components/
     NavBar.js                        - top nav across all 7 pages
-    LandingPage.js                   - the marketing landing page's markup, shared by "/" and /lp/<variant>
+    LandingPage.js                   - the marketing landing page's markup, rendered at "/"
     RatingsPageClient.js, WatchedPageClient.js, WishlistPageClient.js,
     RecommendationsPageClient.js, PreferencesPageClient.js, ChatPageClient.js
                                       - client-side logic for each page
@@ -186,7 +185,6 @@ cinematch/
     recommendations.js               - turns a profile into batch picks or a single "Surprise Me" pick
     chat.js                          - the chatbot's tool-use loop
     questions.js                     - the 3 guided questions + shared "enum" value lists
-    landingVariants.js               - the 3 landing-page pitches + DEFAULT_LANDING_VARIANT (see below)
     useTitleSearch.js                - shared search/disambiguation hook (Ratings + Wishlist pages)
     useToast.js                      - shared toast-notification hook
   prisma/
@@ -223,8 +221,8 @@ npm run dev
 ```
 
 Open http://localhost:3000 — you'll see the marketing landing page (the
-site's front door, testing one of 3 one-line pitches - see "Landing page &
-pitch testing" below). Click "Get started free" to register, then try:
+site's front door, `components/LandingPage.js`). Click "Get started free"
+to register, then try:
 
 1. Go to Ratings and search for 2-3 titles you know well, rating each with
    a "why" (the reminder banner's sample questions are just inspiration if
@@ -238,33 +236,6 @@ pitch testing" below). Click "Get started free" to register, then try:
 5. On any of the search-driven pages, try a deliberately ambiguous or
    misremembered title, then click "Show other possible matches" to see the
    disambiguation flow.
-
-### Landing page & pitch testing
-
-`/` shows a marketing landing page instead of going straight to login/
-register - the idea being to catch a new visitor's attention with a pitch
-first, the way most marketing sites do, rather than opening on a bare login
-form. There are 3 one-line pitches to test against each other:
-
-- **"AI picks your next watch."** (`/lp/ai-picks`) - capability-led
-- **"Your taste, finally explained."** (`/lp/taste-explained`) - insight-led
-- **"Stop wasting 5 days a year deciding what to watch."** (`/lp/decision-fatigue`) - pain-led
-
-All 3 share one template (`components/LandingPage.js`) and stay live at their
-own URL regardless of which one is the default, so you can point a specific
-ad/campaign link at one exact pitch. Every "Get started" click carries which
-pitch it came from through to the signup event (`landingVariant` in its
-metadata - see `lib/events.js` and `app/api/register/route.js`), so
-`/admin/metrics` can show views → signups → conversion per pitch, not just
-which one got the most traffic.
-
-**To change which pitch is the default** (the one shown at `/`): open
-`lib/landingVariants.js` and change the `DEFAULT_LANDING_VARIANT` constant to
-any key from `LANDING_VARIANTS` above it - nothing else needs to change,
-anywhere. To add a 4th pitch: add a new entry to `LANDING_VARIANTS` (its own
-headline/subhead), optionally point `DEFAULT_LANDING_VARIANT` at it - every
-other file (the page template, the signup-attribution check, the metrics
-page) reads from `LANDING_VARIANTS` directly, so a new key just works.
 
 ### A transparency note on testing
 

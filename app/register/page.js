@@ -1,18 +1,11 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-// useSearchParams() needs a Suspense boundary or Next.js can't statically
-// prerender the page shell - see the wrapping RegisterPage below.
-function RegisterForm() {
+export default function RegisterPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  // Set by a landing-page CTA (?ref=ai-picks etc. - see app/lp/[variant]) so
-  // the signup event can be attributed back to which pitch worked. Absent
-  // for anyone who just navigates here directly, which is expected.
-  const landingVariant = searchParams.get("ref");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +21,7 @@ function RegisterForm() {
       const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, consent, landingVariant }),
+        body: JSON.stringify({ name, email, password, consent }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Registration failed.");
@@ -94,13 +87,5 @@ function RegisterForm() {
         </p>
       </div>
     </div>
-  );
-}
-
-export default function RegisterPage() {
-  return (
-    <Suspense fallback={null}>
-      <RegisterForm />
-    </Suspense>
   );
 }
