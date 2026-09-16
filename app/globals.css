@@ -1,65 +1,70 @@
 /* Small, hand-written stylesheet - no CSS framework, so it's easy to read
    and tweak. Visual language follows the "Classical" design system: an
-   editorial, book-like look on a soft near-white ground - Cormorant
-   Garamond headings over Lora body, hairline rules, color applied as
-   stroke/tint rather than fill, and outlined (never solid-filled) buttons.
-   Every class name below is unchanged from before this pass - only the
-   declarations changed, so no component markup needed to move. */
+   editorial, book-like look - Cormorant Garamond headings over Lora body,
+   hairline rules, color applied as stroke/tint rather than fill. Ground is
+   FilmTonight's navy/amber brand palette (Brand Foundation Brief - "dark
+   room / lit screen / movie at night"), site-wide: this used to be scoped
+   to the landing/login/register flow only (a ".brand-dark" utility class)
+   while the rest of the app kept an older cream/paper ground: that utility
+   is gone now, folded into these tokens directly, so every page matches
+   the landing page's redesign. Every class name below is unchanged from
+   before this pass - only the declarations changed, so no component markup
+   needed to move. */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Lora:wght@400;600&display=swap');
 
 :root {
-  --color-bg: #f3f2f2;
-  --color-surface: #eae9e9;
-  --color-text: #201f1d;
-  --color-accent: #b68235;
-  --color-divider: color-mix(in srgb, #201f1d 16%, transparent);
-
-  /* Tonal ramps - same step of any ramp carries the same visual weight. */
-  --color-neutral-100: #f8f4f4;
-  --color-neutral-200: #eae7e7;
-  --color-neutral-300: #d7d3d3;
-  --color-neutral-400: #bab6b6;
-  --color-neutral-500: #9b9797;
-  --color-neutral-600: #7d7979;
-  --color-neutral-700: #605d5d;
-  --color-neutral-800: #444141;
-  --color-neutral-900: #2d2b2b;
-
-  --color-accent-100: #fff3e4;
-  --color-accent-200: #ffe3bf;
-  --color-accent-300: #facb8d;
-  --color-accent-400: #e1ad66;
-  --color-accent-500: #c28d41;
-  --color-accent-600: #a06f24;
-  --color-accent-700: #7d5411;
-  --color-accent-800: #5a3b0a;
-  --color-accent-900: #3a270d;
-
-  /* Success/danger ramps - built on the same muted, low-saturation logic as
-     the accent ramp above (moss green / brick terracotta) so semantic
-     colors (watched vs. not-interested, etc.) still read as part of the
-     same paper-and-ink family rather than clashing bright red/green. */
-  --color-success-100: #eaefdd;
-  --color-success-300: #b9c896;
-  --color-success-500: #7c9a4e;
-  --color-success-700: #55712f;
-  --color-success-900: #33431b;
-
-  --color-danger-100: #fbe6e1;
-  --color-danger-300: #e3a897;
-  --color-danger-500: #b4634a;
-  --color-danger-700: #874331;
-  --color-danger-900: #4a2419;
-
-  /* FilmTonight brand palette (Brand Foundation Brief) - "dark room / lit
-     screen / movie at night", not generic tech-startup blue. Distinct from
-     the "Classical" cream/paper --color-* ramps above, which still power
-     the rest of the app post-login. Applied via the .brand-dark utility
-     below, not scattered as raw hex through components. */
   --brand-navy: #1b1f3b;
   --brand-amber: #f0a93a;
   --brand-amber-600: #d99424; /* hover/active state for amber fills */
   --brand-cream: #f2efe7; /* warm off-white - body text on navy */
+
+  --color-bg: var(--brand-navy);
+  --color-surface: color-mix(in srgb, var(--brand-cream) 8%, var(--brand-navy));
+  --color-text: var(--brand-cream);
+  --color-accent: var(--brand-amber);
+  --color-divider: color-mix(in srgb, var(--brand-cream) 18%, transparent);
+
+  /* Tonal ramps - same step of any ramp carries the same visual weight.
+     On this dark ground, a low step is a subtle tint just off the navy
+     background (chip/card fills) and a high step is bright/saturated
+     (text and icons that need to read on navy) - the opposite direction
+     from a light theme's ramp. */
+  --color-neutral-100: color-mix(in srgb, var(--brand-cream) 6%, var(--brand-navy));
+  --color-neutral-200: color-mix(in srgb, var(--brand-cream) 12%, var(--brand-navy));
+  --color-neutral-300: color-mix(in srgb, var(--brand-cream) 20%, var(--brand-navy));
+  --color-neutral-400: color-mix(in srgb, var(--brand-cream) 32%, var(--brand-navy));
+  --color-neutral-500: color-mix(in srgb, var(--brand-cream) 46%, var(--brand-navy));
+  --color-neutral-600: color-mix(in srgb, var(--brand-cream) 60%, var(--brand-navy));
+  --color-neutral-700: color-mix(in srgb, var(--brand-cream) 72%, var(--brand-navy));
+  --color-neutral-800: color-mix(in srgb, var(--brand-cream) 86%, var(--brand-navy));
+  --color-neutral-900: var(--brand-cream);
+
+  --color-accent-100: color-mix(in srgb, var(--brand-amber) 14%, var(--brand-navy));
+  --color-accent-200: color-mix(in srgb, var(--brand-amber) 24%, var(--brand-navy));
+  --color-accent-300: color-mix(in srgb, var(--brand-amber) 38%, var(--brand-navy));
+  --color-accent-400: color-mix(in srgb, var(--brand-amber) 55%, var(--brand-navy));
+  --color-accent-500: color-mix(in srgb, var(--brand-amber) 75%, var(--brand-navy));
+  --color-accent-600: var(--brand-amber-600);
+  --color-accent-700: var(--brand-amber);
+  --color-accent-800: color-mix(in srgb, var(--brand-amber) 70%, var(--brand-cream));
+  --color-accent-900: color-mix(in srgb, var(--brand-amber) 40%, var(--brand-cream));
+
+  /* Success/danger ramps - built on the same tint-toward-navy /
+     bright-toward-cream logic as the accent ramp above (sage green / warm
+     terracotta) so semantic colors (watched vs. not-interested, etc.) still
+     read as part of the same navy-and-amber family rather than clashing
+     bright red/green. */
+  --color-success-100: color-mix(in srgb, #8fbf5a 16%, var(--brand-navy));
+  --color-success-300: color-mix(in srgb, #8fbf5a 40%, var(--brand-navy));
+  --color-success-500: #8fbf5a;
+  --color-success-700: color-mix(in srgb, #8fbf5a 70%, var(--brand-cream));
+  --color-success-900: color-mix(in srgb, #8fbf5a 35%, var(--brand-cream));
+
+  --color-danger-100: color-mix(in srgb, #e0785c 16%, var(--brand-navy));
+  --color-danger-300: color-mix(in srgb, #e0785c 40%, var(--brand-navy));
+  --color-danger-500: #e0785c;
+  --color-danger-700: color-mix(in srgb, #e0785c 70%, var(--brand-cream));
+  --color-danger-900: color-mix(in srgb, #e0785c 35%, var(--brand-cream));
 
   --font-heading: "Cormorant Garamond", system-ui, sans-serif;
   --font-heading-weight: 600;
@@ -76,17 +81,23 @@
   --radius-md: 4px;
   --radius-lg: 7px;
 
-  --shadow-sm: 0 1px 2px color-mix(in srgb, #2d2b2b 14%, transparent);
-  --shadow-md: 0 3px 10px color-mix(in srgb, #2d2b2b 16%, transparent);
-  --shadow-lg: 0 12px 32px color-mix(in srgb, #2d2b2b 22%, transparent);
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #000000 30%, transparent);
+  --shadow-md: 0 3px 10px color-mix(in srgb, #000000 35%, transparent);
+  --shadow-lg: 0 12px 32px color-mix(in srgb, #000000 45%, transparent);
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  background: var(--color-bg);
+}
+
 body {
   margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
   font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.55;
@@ -547,9 +558,14 @@ textarea {
   background: transparent;
   color: var(--color-text);
 }
-.btn-primary { color: var(--color-accent-700); border-color: var(--color-accent); }
-.btn-primary:hover { background: color-mix(in srgb, var(--color-accent) 12%, transparent); }
-.btn-primary:active { background: color-mix(in srgb, var(--color-accent) 22%, transparent); }
+.btn-primary {
+  background: var(--brand-amber);
+  color: var(--brand-navy);
+  border-color: var(--brand-amber);
+  font-weight: 600;
+}
+.btn-primary:hover { background: var(--brand-amber-600); border-color: var(--brand-amber-600); }
+.btn-primary:active { background: color-mix(in srgb, var(--brand-amber-600) 85%, black); border-color: var(--brand-amber-600); }
 .btn-success { color: var(--color-success-700); border-color: var(--color-success-500); }
 .btn-success:hover { background: color-mix(in srgb, var(--color-success-500) 14%, transparent); }
 .btn-success:active { background: color-mix(in srgb, var(--color-success-500) 24%, transparent); }
@@ -731,7 +747,7 @@ textarea {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: color-mix(in srgb, var(--color-neutral-900) 55%, transparent);
+  background: color-mix(in srgb, #000000 55%, transparent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -765,49 +781,7 @@ textarea {
   .rec-card { flex-direction: column; }
 }
 
-/* --- FilmTonight brand theme ---
-   A scoped utility, not a global redesign: redefines the same custom
-   properties every component below (.card, .btn-*, inputs, links, .muted,
-   headings) already reads, so wrapping a section in this class re-themes
-   it to navy/amber automatically, with zero changes to those components'
-   own rules. Applied to the landing page and the login/register flow -
-   see components/LandingPage.js, app/login/page.js, app/register/page.js. */
-.brand-dark {
-  --color-bg: var(--brand-navy);
-  --color-text: var(--brand-cream);
-  --color-divider: color-mix(in srgb, var(--brand-cream) 18%, transparent);
-  --color-accent: var(--brand-amber);
-  --color-accent-700: var(--brand-amber);
-  --color-neutral-700: color-mix(in srgb, var(--brand-cream) 65%, transparent);
-  --color-neutral-800: color-mix(in srgb, var(--brand-cream) 80%, transparent);
-  background: var(--color-bg);
-  color: var(--color-text);
-  min-height: 100dvh;
-}
-.brand-dark .btn-primary {
-  background: var(--brand-amber);
-  color: var(--brand-navy);
-  border-color: var(--brand-amber);
-  font-weight: 600;
-}
-.brand-dark .btn-primary:hover {
-  background: var(--brand-amber-600);
-  border-color: var(--brand-amber-600);
-}
-.landing-nav .brand {
-  color: var(--color-accent);
-  font-weight: 700;
-}
-.landing-kicker {
-  font-family: var(--font-heading);
-  font-weight: var(--font-heading-weight);
-  color: var(--color-accent);
-  font-size: 18px;
-  letter-spacing: 0.02em;
-  margin-bottom: var(--space-2);
-}
-
-/* --- Landing page (app/lp/[variant]) --- */
+/* --- Landing page --- */
 .landing-nav {
   display: flex;
   justify-content: space-between;
@@ -817,12 +791,21 @@ textarea {
 }
 .landing-nav .brand {
   font-family: var(--font-heading);
-  font-weight: var(--font-heading-weight);
+  font-weight: 700;
   font-size: 19px;
+  color: var(--color-accent);
 }
 .landing-nav a {
   color: var(--color-neutral-700);
   font-size: 14px;
+}
+.landing-kicker {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  color: var(--color-accent);
+  font-size: 18px;
+  letter-spacing: 0.02em;
+  margin-bottom: var(--space-2);
 }
 .landing-hero {
   max-width: 720px;

@@ -6,7 +6,7 @@
 // file, so the headline is real text rendered at request time, not
 // something to keep in sync with a hand-made image by hand. Colors are the
 // FilmTonight brand palette (Brand Foundation Brief - navy/amber), matching
-// the .brand-dark theme in app/globals.css.
+// the site-wide theme in app/globals.css.
 import { ImageResponse } from "next/og";
 
 export const alt = "FilmTonight - Stop wasting 5 days a year deciding what to watch";

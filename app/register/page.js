@@ -35,7 +35,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="brand-dark">
+    <>
       <div className="page narrow">
         <h1>FilmTonight</h1>
         <div className="card">
@@ -88,6 +88,6 @@ export default function RegisterPage() {
           </p>
         </div>
       </div>
-    </div>
+    </>
   );
 }

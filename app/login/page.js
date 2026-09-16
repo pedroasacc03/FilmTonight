@@ -33,7 +33,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="brand-dark">
+    <>
       <div className="page narrow">
         <h1>FilmTonight</h1>
         <div className="card">
@@ -64,6 +64,6 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
-    </div>
+    </>
   );
 }

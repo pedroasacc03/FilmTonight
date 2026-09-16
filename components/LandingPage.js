@@ -1,8 +1,7 @@
 // The marketing landing page's markup and behavior, rendered at "/" (the
 // site's front door - what a brand-new visitor sees before login/register).
-// Uses the .brand-dark theme (app/globals.css) - FilmTonight's navy/amber
-// palette, per the Brand Foundation Brief - scoped to this page and the
-// login/register flow only, not the rest of the (still light-themed) app.
+// Uses FilmTonight's navy/amber palette (app/globals.css), per the Brand
+// Foundation Brief - the whole app's default theme, not just this page.
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -15,7 +14,7 @@ export default async function LandingPage() {
   if (user) redirect("/home");
 
   return (
-    <div className="brand-dark">
+    <>
       <div className="landing-nav">
         <span className="brand">FilmTonight</span>
         <Link href="/login">Log in</Link>
@@ -101,6 +100,6 @@ export default async function LandingPage() {
       <div className="landing-footer">
         <Link href="/privacy">Privacy Policy</Link> · <Link href="/terms">Terms of Service</Link>
       </div>
-    </div>
+    </>
   );
 }
