@@ -54,7 +54,7 @@ again. Every page in this app exists to feed or read from that loop.
 | Page | Route | What it does |
 |---|---|---|
 | Home | `/home` | Entry point. A "welcome back" hero with progress toward a solid taste profile (rated titles vs. `RECOMMENDED_RATINGS_GOAL`, 10), quick-action links to every other page, and a preview of the user's **Wishlist** (titles they've actually decided they want to watch — a truer "coming up for you" than an undecided AI suggestion). |
-| Ratings | `/ratings` | For titles the user has **already watched, in real life**: search (backed by TMDB, with an opt-in "show other possible matches" step for ambiguous titles) + a 1-5 star rating + optional "why." A small, dismissible reminder banner surfaces a few of the 10 guided questions from `lib/questions.js` (e.g. "What are your favorite movies?") as search inspiration — it's just a hint, not a form; there's no separate onboarding Q&A flow anymore. |
+| Ratings | `/ratings` | For titles the user has **already watched, in real life**: search (backed by TMDB, with an opt-in "show other possible matches" step for ambiguous titles) + a 1-5 star rating + optional "why." A small, dismissible reminder banner surfaces the 3 guided questions from `lib/questions.js` (favorites, recently watched, hated - trimmed down from an original 10, see that file's comment for why) as search inspiration — it's just a hint, not a form; there's no separate onboarding Q&A flow anymore. |
 | Watched | `/watched` | Every title the user has rated as watched, editable in place (change the stars or the "why" and it re-saves). |
 | Wishlist | `/wishlist` | Titles the user wants to watch but hasn't yet — searchable/addable directly here, or added via "Add to Wishlist" from a Recommendations card. Each entry can be marked Watched or Not Interested. |
 | Recommendations | `/recommendations` | Gated behind `RATINGS_GOAL` (5) watched ratings — not enough signal to be more than a generic guess before that — with `RECOMMENDED_RATINGS_GOAL` (10) surfaced as a non-blocking "you'll get better picks" nudge past the unlock. Once unlocked: the queue of pending AI picks awaiting a decision, "Generate more picks" (a batch of up to 4 new suggestions - 2 movies + 2 TV shows, capped in code even if Claude returns more) and "Surprise Me" (exactly one deliberate stretch pick). A candidate that's already been rated or recommended is rejected in code before it's ever shown, regardless of what the prompt told Claude to avoid. Mark Watched immediately prompts for a star rating (`RateModal`) instead of leaving it to be rated later. Mark Watched / Add to Wishlist / Not Interested triages a card and closes the loop back into Ratings/Wishlist. Asks for the user's region on first use, since streaming availability is country-specific. |
@@ -185,7 +185,7 @@ cinematch/
     profile.js                       - the AI Preference Analysis Engine
     recommendations.js               - turns a profile into batch picks or a single "Surprise Me" pick
     chat.js                          - the chatbot's tool-use loop
-    questions.js                     - the 10 guided questions + shared "enum" value lists
+    questions.js                     - the 3 guided questions + shared "enum" value lists
     landingVariants.js               - the 3 landing-page pitches + DEFAULT_LANDING_VARIANT (see below)
     useTitleSearch.js                - shared search/disambiguation hook (Ratings + Wishlist pages)
     useToast.js                      - shared toast-notification hook
@@ -340,7 +340,7 @@ isn't local to the app server anymore.
   below), quick-action links, and a Wishlist preview
 - Ratings page: search (TMDB, cached, with opt-in disambiguation), rate a
   watched title, recently-rated summary, dismissible guided-questions
-  reminder banner (10 sample prompts from `lib/questions.js`, for
+  reminder banner (3 sample prompts from `lib/questions.js`, for
   inspiration only — not a Q&A form)
 - Watched page: every watched title, editable in place; anything marked
   watched without a star rating (e.g. a one-click "Mark Watched" from

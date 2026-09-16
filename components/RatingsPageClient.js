@@ -133,10 +133,7 @@ export default function RatingsPageClient({ guidedQuestions }) {
             </button>
           </div>
           <p className="muted" style={{ margin: "4px 0 0" }}>
-            {guidedQuestions
-              .slice(0, 3)
-              .map((q) => `"${q.text}"`)
-              .join("  ·  ")}
+            {guidedQuestions.map((q) => `"${q.text}"`).join("  ·  ")}
           </p>
         </div>
       )}
