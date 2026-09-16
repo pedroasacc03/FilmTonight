@@ -51,6 +51,16 @@
   --color-danger-700: #874331;
   --color-danger-900: #4a2419;
 
+  /* FilmTonight brand palette (Brand Foundation Brief) - "dark room / lit
+     screen / movie at night", not generic tech-startup blue. Distinct from
+     the "Classical" cream/paper --color-* ramps above, which still power
+     the rest of the app post-login. Applied via the .brand-dark utility
+     below, not scattered as raw hex through components. */
+  --brand-navy: #1b1f3b;
+  --brand-amber: #f0a93a;
+  --brand-amber-600: #d99424; /* hover/active state for amber fills */
+  --brand-cream: #f2efe7; /* warm off-white - body text on navy */
+
   --font-heading: "Cormorant Garamond", system-ui, sans-serif;
   --font-heading-weight: 600;
   --font-body: "Lora", system-ui, sans-serif;
@@ -753,6 +763,48 @@ textarea {
 @media (max-width: 700px) {
   .two-col { grid-template-columns: 1fr; }
   .rec-card { flex-direction: column; }
+}
+
+/* --- FilmTonight brand theme ---
+   A scoped utility, not a global redesign: redefines the same custom
+   properties every component below (.card, .btn-*, inputs, links, .muted,
+   headings) already reads, so wrapping a section in this class re-themes
+   it to navy/amber automatically, with zero changes to those components'
+   own rules. Applied to the landing page and the login/register flow -
+   see components/LandingPage.js, app/login/page.js, app/register/page.js. */
+.brand-dark {
+  --color-bg: var(--brand-navy);
+  --color-text: var(--brand-cream);
+  --color-divider: color-mix(in srgb, var(--brand-cream) 18%, transparent);
+  --color-accent: var(--brand-amber);
+  --color-accent-700: var(--brand-amber);
+  --color-neutral-700: color-mix(in srgb, var(--brand-cream) 65%, transparent);
+  --color-neutral-800: color-mix(in srgb, var(--brand-cream) 80%, transparent);
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100dvh;
+}
+.brand-dark .btn-primary {
+  background: var(--brand-amber);
+  color: var(--brand-navy);
+  border-color: var(--brand-amber);
+  font-weight: 600;
+}
+.brand-dark .btn-primary:hover {
+  background: var(--brand-amber-600);
+  border-color: var(--brand-amber-600);
+}
+.landing-nav .brand {
+  color: var(--color-accent);
+  font-weight: 700;
+}
+.landing-kicker {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  color: var(--color-accent);
+  font-size: 18px;
+  letter-spacing: 0.02em;
+  margin-bottom: var(--space-2);
 }
 
 /* --- Landing page (app/lp/[variant]) --- */

@@ -36,7 +36,7 @@ export default async function WatchedPage() {
         <h1>Watched</h1>
         <p className="muted" style={{ marginBottom: 24 }}>
           Every title you&apos;ve rated as watched, with your rating and your comments. Click the stars to rate or
-          re-rate a title - the more of these are filled in, the better CineMatch knows your taste and the
+          re-rate a title - the more of these are filled in, the better FilmTonight knows your taste and the
           sharper your recommendations get.
         </p>
         <WatchedPageClient initialWatched={watched} />

@@ -10,7 +10,7 @@ import { useTitleSearch } from "@/lib/useTitleSearch";
 import SearchRefineHint from "@/components/SearchRefineHint";
 import { RATINGS_GOAL, RECOMMENDED_RATINGS_GOAL } from "@/lib/questions";
 
-const STORAGE_KEY = "cinematch_hide_ratings_reminder";
+const STORAGE_KEY = "filmtonight_hide_ratings_reminder";
 
 // This page is only for titles you've already watched, in real life, and
 // want to rate - want-to-watch and not-interested live on the Wishlist and

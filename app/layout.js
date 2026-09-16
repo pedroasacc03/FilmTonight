@@ -10,23 +10,23 @@ const DESCRIPTION = "Rate what you've watched, get an AI-built taste profile, an
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "CineMatch",
+  title: "FilmTonight",
   description: DESCRIPTION,
   // og:image itself comes from app/opengraph-image.js (next/og-generated,
   // not a static file) - Next.js wires it into both the openGraph.images
   // and twitter.images tags automatically from that one file, including
   // og:image:width/height/type, so it doesn't need to be repeated here.
   openGraph: {
-    title: "CineMatch - Stop wasting 5 days a year deciding what to watch",
+    title: "FilmTonight - Stop wasting 5 days a year deciding what to watch",
     description: DESCRIPTION,
     url: "/",
-    siteName: "CineMatch",
+    siteName: "FilmTonight",
     type: "website",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CineMatch - Stop wasting 5 days a year deciding what to watch",
+    title: "FilmTonight - Stop wasting 5 days a year deciding what to watch",
     description: DESCRIPTION,
   },
 };

@@ -1,4 +1,4 @@
-// Prisma schema for CineMatch.
+// Prisma schema for FilmTonight.
 //
 // We use SQLite because it needs zero setup - it's just a file on disk
 // (prisma/dev.db). That makes "npm install && npm run dev" work immediately

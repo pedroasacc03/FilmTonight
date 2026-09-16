@@ -1,10 +1,17 @@
-# CineMatch
+# FilmTonight
 
-CineMatch is a movie & TV show recommendation platform. Users rate what they've
+FilmTonight is a movie & TV show recommendation platform. Users rate what they've
 watched, an AI engine turns that into a structured taste profile, and the app
 recommends new titles they haven't seen — with a plain-English reason for
 each pick. This repo is the **Phase 1 MVP**: a working, runnable version of
 the full core loop, built to be extended.
+
+> **Rebranded from "CineMatch" to "FilmTonight"** - the working directory
+> (`cinematch/`) and npm package internals kept their original name where
+> renaming would be purely cosmetic or carry real risk (see the project's
+> rebrand notes); every user-facing surface (pages, copy, meta tags, the
+> session cookie) uses the new name. Don't be surprised to still see
+> "cinematch" in file paths below.
 
 > **If you're an AI assistant (e.g. Claude Code) picking this up**: read this
 > whole file before changing anything. It explains the product concept, the

@@ -33,7 +33,7 @@ export default function NavBar({ activePath }) {
 
   return (
     <div className="navbar">
-      <span className="brand">CineMatch</span>
+      <span className="brand">FilmTonight</span>
       <button
         type="button"
         className="navbar-menu-toggle"

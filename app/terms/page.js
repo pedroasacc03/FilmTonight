@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/lib/session";
 import NavBar from "@/components/NavBar";
 import Link from "next/link";
 
-export const metadata = { title: "Terms of Service - CineMatch" };
+export const metadata = { title: "Terms of Service - FilmTonight" };
 
 export default async function TermsPage() {
   const user = await getCurrentUser();
@@ -17,7 +17,7 @@ export default async function TermsPage() {
         <NavBar activePath="/terms" />
       ) : (
         <div className="navbar">
-          <span className="brand">CineMatch</span>
+          <span className="brand">FilmTonight</span>
           <nav>
             <Link href="/login">Log in</Link>
           </nav>
@@ -30,16 +30,16 @@ export default async function TermsPage() {
         <div className="card">
           <h2>1. Acceptance</h2>
           <p>
-            CineMatch is operated by <strong>Pedro Sena</strong>, based in São Paulo, Brazil. By creating a
-            CineMatch account, you&apos;re agreeing to these Terms of Service with Pedro, and to our{" "}
-            <Link href="/privacy">Privacy Policy</Link>. If you don&apos;t agree, please don&apos;t use CineMatch.
+            FilmTonight is operated by <strong>Pedro Sena</strong>, based in São Paulo, Brazil. By creating a
+            FilmTonight account, you&apos;re agreeing to these Terms of Service with Pedro, and to our{" "}
+            <Link href="/privacy">Privacy Policy</Link>. If you don&apos;t agree, please don&apos;t use FilmTonight.
           </p>
         </div>
 
         <div className="card">
-          <h2>2. What CineMatch is</h2>
+          <h2>2. What FilmTonight is</h2>
           <p>
-            CineMatch is an AI-assisted movie and TV recommendation platform, currently offered as an early-stage
+            FilmTonight is an AI-assisted movie and TV recommendation platform, currently offered as an early-stage
             (MVP) product. You rate what you&apos;ve watched, an AI builds a taste profile from that, and it
             recommends new titles based on it. Title details, streaming availability, and Rotten Tomatoes/IMDb
             scores are looked up via TMDB (The Movie Database) and OMDb, third-party movie/TV databases - not
@@ -68,7 +68,7 @@ export default async function TermsPage() {
 
         <div className="card">
           <h2>5. Acceptable use</h2>
-          <p>Don&apos;t use CineMatch to:</p>
+          <p>Don&apos;t use FilmTonight to:</p>
           <ul>
             <li>Scrape, bulk-extract, or resell data from the app;</li>
             <li>Try to bypass rate limits or abuse the AI features to run up costs on our end;</li>
@@ -81,7 +81,7 @@ export default async function TermsPage() {
         <div className="card">
           <h2>6. No warranty</h2>
           <p>
-            CineMatch is provided &quot;as is,&quot; without warranties of any kind, express or implied. As an
+            FilmTonight is provided &quot;as is,&quot; without warranties of any kind, express or implied. As an
             early-stage product, features may change, break, or be removed. AI-generated recommendations, summaries,
             and streaming/availability info (Section 2) are not guaranteed to be accurate, complete, or current.
           </p>
@@ -91,7 +91,7 @@ export default async function TermsPage() {
           <h2>7. Limitation of liability</h2>
           <p>
             To the maximum extent permitted by law, we aren&apos;t liable for any indirect, incidental, or
-            consequential damages arising from your use of CineMatch, including decisions made based on an AI
+            consequential damages arising from your use of FilmTonight, including decisions made based on an AI
             recommendation or streaming-availability info that turned out to be wrong.
           </p>
         </div>
@@ -99,7 +99,7 @@ export default async function TermsPage() {
         <div className="card">
           <h2>8. Termination</h2>
           <p>
-            You can stop using CineMatch at any time and request account deletion per our{" "}
+            You can stop using FilmTonight at any time and request account deletion per our{" "}
             <Link href="/privacy">Privacy Policy</Link>. We may suspend or terminate your account for violating
             Section 5, or discontinue the service entirely, with notice where reasonably possible.
           </p>
@@ -108,7 +108,7 @@ export default async function TermsPage() {
         <div className="card">
           <h2>9. Changes</h2>
           <p>
-            We may update these terms or the service itself as CineMatch develops. We&apos;ll flag material
+            We may update these terms or the service itself as FilmTonight develops. We&apos;ll flag material
             changes to these terms before they take effect.
           </p>
         </div>

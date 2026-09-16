@@ -13,7 +13,7 @@ import { getCurrentUser } from "@/lib/session";
 import NavBar from "@/components/NavBar";
 import Link from "next/link";
 
-export const metadata = { title: "Privacy Policy - CineMatch" };
+export const metadata = { title: "Privacy Policy - FilmTonight" };
 
 export default async function PrivacyPage() {
   const user = await getCurrentUser();
@@ -24,7 +24,7 @@ export default async function PrivacyPage() {
         <NavBar activePath="/privacy" />
       ) : (
         <div className="navbar">
-          <span className="brand">CineMatch</span>
+          <span className="brand">FilmTonight</span>
           <nav>
             <Link href="/login">Log in</Link>
           </nav>
@@ -37,8 +37,8 @@ export default async function PrivacyPage() {
         <div className="card">
           <h2>1. Who this is</h2>
           <p>
-            CineMatch is operated by <strong>Pedro Sena</strong> (&quot;we&quot;, &quot;us&quot;), an individual
-            based in São Paulo, Brazil. This policy explains what personal data we collect through the CineMatch
+            FilmTonight is operated by <strong>Pedro Sena</strong> (&quot;we&quot;, &quot;us&quot;), an individual
+            based in São Paulo, Brazil. This policy explains what personal data we collect through the FilmTonight
             app, why, and what rights you have over it under Brazil&apos;s Lei Geral de Proteção de Dados (LGPD).
             You can reach us at <strong>pedrocatalao767@gmail.com</strong> for anything in this policy, including
             exercising your rights below - Pedro is the point of contact for all data-protection matters.
@@ -70,7 +70,7 @@ export default async function PrivacyPage() {
               or indirectly through a rating or AI recommendation), the title name is sent to TMDB to look up its
               details - see Section 4.
             </li>
-            <li><strong>Chat messages:</strong> what you send the CineMatch chatbot, and its replies.</li>
+            <li><strong>Chat messages:</strong> what you send the FilmTonight chatbot, and its replies.</li>
             <li>
               <strong>Basic account-milestone events:</strong> a small, first-party log of a handful of moments -
               that you signed up, made your first rating, and reached 10 watched ratings. Kept only to understand
@@ -101,7 +101,7 @@ export default async function PrivacyPage() {
             chatbot (which can also read and update your ratings, wishlist, and profile on request - the same
             data described in Section 2, just through a conversational interface instead of the regular pages).
             To do this, relevant parts of your data (ratings, your &quot;why&quot; notes, your taste profile, and
-            chat messages) are sent to <strong>Anthropic</strong>, the AI provider behind CineMatch, for processing.
+            chat messages) are sent to <strong>Anthropic</strong>, the AI provider behind FilmTonight, for processing.
             Anthropic acts as our data processor for this purpose.
           </p>
           <p>
@@ -126,7 +126,7 @@ export default async function PrivacyPage() {
             <strong>Anthropic, TMDB, and OMDb</strong> (Section 4) are the only third parties your data is sent to -
             each for the specific, limited purpose described there. We do not sell your data, and we do not share
             it with advertisers, data brokers, or third-party analytics companies - because we don&apos;t use any.
-            There is no tracking pixel, no ad network, and no third-party analytics SDK anywhere in CineMatch.
+            There is no tracking pixel, no ad network, and no third-party analytics SDK anywhere in FilmTonight.
           </p>
           <p>
             The only usage data we keep is the small, first-party account-milestone log mentioned in Section 2
@@ -141,7 +141,7 @@ export default async function PrivacyPage() {
           <ul>
             <li>Passwords are never stored in plain text - they&apos;re hashed with scrypt, a slow, purpose-built algorithm for this.</li>
             <li>Your login session is a signed, HTTP-only cookie that can&apos;t be read or forged by client-side scripts.</li>
-            <li>All traffic to CineMatch should be served over HTTPS in production.</li>
+            <li>All traffic to FilmTonight should be served over HTTPS in production.</li>
           </ul>
         </div>
 
@@ -179,7 +179,7 @@ export default async function PrivacyPage() {
         <div className="card">
           <h2>9. Cookies</h2>
           <p>
-            CineMatch sets exactly one cookie: a signed session token that keeps you logged in. It&apos;s strictly
+            FilmTonight sets exactly one cookie: a signed session token that keeps you logged in. It&apos;s strictly
             necessary for the app to function and isn&apos;t used for tracking, profiling, or advertising. We
             don&apos;t use any third-party cookies.
           </p>
@@ -188,7 +188,7 @@ export default async function PrivacyPage() {
         <div className="card">
           <h2>10. Children</h2>
           <p>
-            CineMatch isn&apos;t directed at children and requires you to be old enough, under the law of your
+            FilmTonight isn&apos;t directed at children and requires you to be old enough, under the law of your
             country, to give your own consent to this policy. We don&apos;t knowingly collect data from children
             without the specific, informed consent of a parent or legal guardian, as required by LGPD Art. 14.
           </p>
