@@ -65,6 +65,43 @@ export default async function LandingPage() {
       </div>
 
       <div className="landing-section">
+        <h2>See it in action</h2>
+        <p className="landing-screenshots-intro muted">Real screens from the app - not mockups.</p>
+        <figure className="landing-screenshot">
+          <img
+            src="/screenshots/recommendation-why.png"
+            alt="A FilmTonight recommendation card for the show MINDHUNTER, with a 'Why you'll like it' note explaining that Fincher-directed episodes and a psychological, control-driven approach to criminal minds make it a near-perfect match for the user's taste."
+            width={980}
+            height={219}
+            loading="lazy"
+          />
+          <figcaption>A recommendation, and the actual reason behind it - never just a star rating.</figcaption>
+        </figure>
+        <div className="landing-screenshot-grid">
+          <figure className="landing-screenshot">
+            <img
+              src="/screenshots/taste-profile-summary.png"
+              alt="The My Preferences page showing an AI-written taste-profile summary and a list of editable 'drawn to' chips like 'obsessive drive toward mastery' and 'sharp, fast dialogue.'"
+              width={1000}
+              height={519}
+              loading="lazy"
+            />
+            <figcaption>Your taste profile, in plain English - and every chip is editable.</figcaption>
+          </figure>
+          <figure className="landing-screenshot">
+            <img
+              src="/screenshots/taste-profile-genres.png"
+              alt="The My Preferences page showing star-rated genre confidence for Drama, Thriller, Mystery, and others, plus a Favorite Directors/Creators/Actors section listing David Fincher."
+              width={1000}
+              height={483}
+              loading="lazy"
+            />
+            <figcaption>Genre confidence and favorite creators, picked up automatically as you rate.</figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <div className="landing-section">
         <h2>What you get</h2>
         <div className="landing-feature-grid">
           <div className="landing-feature-card">
