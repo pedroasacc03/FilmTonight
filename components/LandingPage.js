@@ -71,9 +71,9 @@ export default async function LandingPage() {
         <figure className="landing-screenshot">
           <img
             src="/screenshots/recommendation-why.png"
-            alt="A FilmTonight recommendation card for the show MINDHUNTER, with a 'Why you'll like it' note explaining that Fincher-directed episodes and a psychological, control-driven approach to criminal minds make it a near-perfect match for the user's taste."
-            width={980}
-            height={219}
+            alt="A FilmTonight recommendation card for the show Mr. Robot, with a 'Why you'll like it' note explaining that its unreliable narrator, obsession with control, and class critique match the user's taste."
+            width={1000}
+            height={214}
             loading="lazy"
           />
           <figcaption>A recommendation, and the actual reason behind it - never just a star rating.</figcaption>
@@ -82,9 +82,9 @@ export default async function LandingPage() {
           <figure className="landing-screenshot">
             <img
               src="/screenshots/taste-profile-summary.png"
-              alt="The My Preferences page showing an AI-written taste-profile summary and a list of editable 'drawn to' chips like 'obsessive drive toward mastery' and 'sharp, fast dialogue.'"
+              alt="The My Preferences page showing an AI-written taste-profile summary and a list of editable 'drawn to' chips like 'earned plot twists' and 'sharp, dangerous-feeling dialogue.'"
               width={1000}
-              height={519}
+              height={645}
               loading="lazy"
             />
             <figcaption>Your taste profile, in plain English - and every chip is editable.</figcaption>
@@ -94,7 +94,7 @@ export default async function LandingPage() {
               src="/screenshots/taste-profile-genres.png"
               alt="The My Preferences page showing star-rated genre confidence for Drama, Thriller, Mystery, and others, plus a Favorite Directors/Creators/Actors section listing David Fincher."
               width={1000}
-              height={483}
+              height={535}
               loading="lazy"
             />
             <figcaption>Genre confidence and favorite creators, picked up automatically as you rate.</figcaption>
