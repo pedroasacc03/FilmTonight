@@ -3,9 +3,13 @@ import "./globals.css";
 // Absolute base URL social crawlers (LinkedIn, Instagram bio link previews,
 // Twitter/X, etc.) resolve the relative og:image URL against - without this,
 // Next.js falls back to a guess (logs a build warning) that's wrong outside
-// local dev. SITE_URL is configurable via env like the rest of the app's
-// external-facing config, defaulting to local dev's own address.
-const SITE_URL = process.env.SITE_URL || "http://localhost:3000";
+// local dev. SITE_URL is configurable via env (set on Railway - see
+// README's deploy steps) so this should always come from the env var in
+// production; the fallback is the real production domain rather than
+// localhost, so a deploy that forgets to set SITE_URL still points social
+// previews somewhere real instead of an unreachable local address. Local
+// dev overrides this via .env (see .env.example).
+const SITE_URL = process.env.SITE_URL || "https://filmtonight-production.up.railway.app";
 const DESCRIPTION = "Rate what you've watched, get an AI-built taste profile, and get picks that actually fit you.";
 
 export const metadata = {

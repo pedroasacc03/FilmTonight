@@ -22,10 +22,11 @@ export default async function LandingPage() {
 
       <div className="landing-hero">
         <p className="landing-kicker">{TAGLINE}</p>
-        <h1>Stop wasting 5 days a year deciding what to watch.</h1>
+        <h1>Movie and TV picks that actually fit your taste.</h1>
         <p>
-          Twenty minutes of scrolling tonight is twenty minutes you won&apos;t get back. FilmTonight narrows it
-          down to a handful of picks that actually fit you - so you can just press play.
+          You waste about 5 days a year just deciding what to watch. Twenty minutes of scrolling tonight is twenty
+          minutes you won&apos;t get back - FilmTonight narrows it down to a handful of picks that actually fit you,
+          so you can just press play.
         </p>
         <div className="landing-cta-row">
           <Link href="/register" className="btn btn-primary">
