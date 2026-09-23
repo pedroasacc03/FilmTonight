@@ -37,7 +37,22 @@ const EVENT_LABELS = {
   [EVENT_NAMES.CHAT_CLEARED]: "Chat cleared",
   [EVENT_NAMES.PROFILE_EDITED]: "Profile edited",
   [EVENT_NAMES.PROFILE_REANALYZED]: "Profile re-analyzed",
+  [EVENT_NAMES.LANDING_VIEW]: "Landing page view",
+  [EVENT_NAMES.COST_PROFILE_ANALYSIS]: "Cost: profile analysis",
+  [EVENT_NAMES.COST_RECOMMENDATIONS_BATCH]: "Cost: recommendation batch",
+  [EVENT_NAMES.COST_SURPRISE_PICK]: "Cost: surprise pick",
+  [EVENT_NAMES.COST_CHAT_MESSAGE]: "Cost: chat message",
 };
+
+// The four cost-tracking events (see lib/events.js trackCostEvent) - each
+// row here becomes one row of the "AI cost" card below. Order matters: this
+// is the display order.
+const COST_EVENT_ROWS = [
+  { name: EVENT_NAMES.COST_PROFILE_ANALYSIS, label: "Taste-profile analysis", note: "fires after most ratings, batched - see lib/profile.js" },
+  { name: EVENT_NAMES.COST_RECOMMENDATIONS_BATCH, label: "Recommendation batch (4 picks)", note: "\"Generate more picks\"" },
+  { name: EVENT_NAMES.COST_SURPRISE_PICK, label: "Surprise Me pick (1 pick)", note: "includes any retry on a collision" },
+  { name: EVENT_NAMES.COST_CHAT_MESSAGE, label: "Chat message", note: "summed across that turn's full tool-use loop" },
+];
 
 // Feature-usage events shown in the "Feature usage" card below - everything
 // except the funnel milestones (signup/first_rating/activated_10_watched,
@@ -72,6 +87,17 @@ function pct(part, total) {
   return `${((part / total) * 100).toFixed(1)}%`;
 }
 
+// Small values (a single call is usually a fraction of a cent) need more
+// decimal places than a running total does, or they'd all just show "$0.00".
+function formatUsd(amount) {
+  if (!amount) return "$0.00";
+  return amount < 0.01 ? `$${amount.toFixed(4)}` : `$${amount.toFixed(2)}`;
+}
+
+function formatTokens(n) {
+  return n.toLocaleString("en-US");
+}
+
 function formatMetadata(metadata) {
   if (!metadata) return "-";
   try {
@@ -103,6 +129,12 @@ export default async function AdminMetricsPage() {
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
+  const costEventNames = COST_EVENT_ROWS.map((r) => r.name);
+  // page_view/active_day/landing_view/cost_* are excluded here - they'd
+  // flood out everything else in a "last 30" feed (they all have their own
+  // cards - see the Page views, Landing page conversion, and AI cost cards).
+  const excludedFromFeed = [EVENT_NAMES.PAGE_VIEW, EVENT_NAMES.ACTIVE_DAY, EVENT_NAMES.LANDING_VIEW, ...costEventNames];
+
   const [
     totalUsers,
     watchedCounts,
@@ -113,13 +145,13 @@ export default async function AdminMetricsPage() {
     activeLast7Groups,
     pageViewEvents,
     featureEventCounts,
+    landingViewCount,
+    costEvents,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.rating.groupBy({ by: ["userId"], where: { status: "watched" }, _count: { _all: true } }),
-    // page_view/active_day are excluded here - they'd flood out everything
-    // else in a "last 30" feed (they both have their own cards).
     prisma.event.findMany({
-      where: { name: { notIn: [EVENT_NAMES.PAGE_VIEW, EVENT_NAMES.ACTIVE_DAY] } },
+      where: { name: { notIn: excludedFromFeed } },
       orderBy: { createdAt: "desc" },
       take: 30,
       include: { user: { select: { email: true } } },
@@ -133,6 +165,10 @@ export default async function AdminMetricsPage() {
     prisma.event.groupBy({ by: ["userId"], where: { name: EVENT_NAMES.ACTIVE_DAY, createdAt: { gte: sevenDaysAgo } } }),
     prisma.event.findMany({ where: { name: EVENT_NAMES.PAGE_VIEW }, select: { metadata: true } }),
     prisma.event.groupBy({ by: ["name"], where: { name: { in: FEATURE_EVENT_NAMES } }, _count: { _all: true } }),
+    prisma.event.count({ where: { name: EVENT_NAMES.LANDING_VIEW } }),
+    // metadata is a JSON string, not a queryable column in SQLite, so the
+    // actual sum/avg math happens in JS below rather than via groupBy/_sum.
+    prisma.event.findMany({ where: { name: { in: costEventNames } }, select: { name: true, metadata: true } }),
   ]);
 
   // TEMPORARY diagnostic - added to check whether production's actual Title
@@ -166,6 +202,29 @@ export default async function AdminMetricsPage() {
   const pageViewRows = Object.entries(pageViewCounts).sort((a, b) => b[1] - a[1]);
 
   const featureCountsMap = Object.fromEntries(featureEventCounts.map((e) => [e.name, e._count._all]));
+
+  // AI cost - each cost_* event's metadata carries token counts and a
+  // precomputed costUsd (see lib/events.js trackCostEvent), so this is a
+  // straight sum per event name rather than a re-derivation of the pricing
+  // math (that lives once, in lib/anthropic.js computeCostUsd).
+  const costStats = {};
+  for (const row of COST_EVENT_ROWS) {
+    costStats[row.name] = { calls: 0, tokens: 0, costUsd: 0 };
+  }
+  for (const e of costEvents) {
+    try {
+      const m = JSON.parse(e.metadata || "{}");
+      const stat = costStats[e.name];
+      if (!stat) continue;
+      stat.calls += 1;
+      stat.tokens += (m.inputTokens || 0) + (m.outputTokens || 0) + (m.cacheCreationTokens || 0) + (m.cacheReadTokens || 0);
+      stat.costUsd += m.costUsd || 0;
+    } catch {
+      // malformed metadata - skip rather than crash the whole page
+    }
+  }
+  const totalAiCostUsd = Object.values(costStats).reduce((sum, s) => sum + s.costUsd, 0);
+  const totalAiCalls = Object.values(costStats).reduce((sum, s) => sum + s.calls, 0);
 
   // Time-to-activation: only computable for accounts that both signed up
   // AND activated after event tracking shipped (both events need to exist).
@@ -241,6 +300,36 @@ export default async function AdminMetricsPage() {
         </div>
 
         <div className="card">
+          <h2>Landing page conversion</h2>
+          <p className="muted">
+            Landing page views are a new metric, tracked only from when this shipped - unlike the funnel above,
+            it can&apos;t be computed retroactively (there&apos;s no view to count for a signup that happened
+            before tracking existed). Signups below are all-time, so this ratio will look inflated at first and
+            settle toward a real number as more signups happen after view tracking began.
+          </p>
+          <div style={{ display: "flex", gap: 32, marginTop: 12, flexWrap: "wrap" }}>
+            <div>
+              <div style={{ fontSize: 28, fontFamily: "var(--font-heading)", fontWeight: "var(--font-heading-weight)" }}>
+                {landingViewCount}
+              </div>
+              <div className="muted">Landing page views</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 28, fontFamily: "var(--font-heading)", fontWeight: "var(--font-heading-weight)" }}>
+                {totalUsers}
+              </div>
+              <div className="muted">Signed up (all-time)</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 28, fontFamily: "var(--font-heading)", fontWeight: "var(--font-heading-weight)" }}>
+                {landingViewCount ? pct(totalUsers, landingViewCount) : "-"}
+              </div>
+              <div className="muted">View &rarr; signup rate</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
           <h2>Title data health (temporary)</h2>
           <p className="muted">
             One-off check on whether cached titles actually have genres/overview/posters populated in THIS
@@ -309,6 +398,52 @@ export default async function AdminMetricsPage() {
               tracking began{trackingStartLabel ? ` (${trackingStartLabel})` : ""}. Accounts that were already
               active before then aren&apos;t counted here, since we don&apos;t know exactly when they crossed 10.
             </p>
+          )}
+        </div>
+
+        <div className="card">
+          <h2>AI cost (tokens &amp; $)</h2>
+          <p className="muted">
+            What each Claude call actually costs, computed from real token usage on every call (see
+            lib/anthropic.js computeCostUsd) - not an estimate. Sonnet 5 pricing: $2/$10 per million input/output
+            tokens, with cache writes at 1.25x input and cache reads at 0.1x input.
+          </p>
+          <p style={{ marginTop: 12, marginBottom: 12 }}>
+            Total AI spend so far: <strong>{formatUsd(totalAiCostUsd)}</strong>{" "}
+            <span className="muted">across {totalAiCalls} call{totalAiCalls === 1 ? "" : "s"}</span>
+          </p>
+          {totalAiCalls === 0 ? (
+            <p className="muted">No AI calls tracked yet.</p>
+          ) : (
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Feature</th>
+                  <th>Calls</th>
+                  <th>Total tokens</th>
+                  <th>Total cost</th>
+                  <th>Avg cost / call</th>
+                </tr>
+              </thead>
+              <tbody>
+                {COST_EVENT_ROWS.map((row) => {
+                  const stat = costStats[row.name];
+                  return (
+                    <tr key={row.name}>
+                      <td>
+                        {row.label}
+                        <br />
+                        <span className="muted" style={{ fontSize: 11 }}>{row.note}</span>
+                      </td>
+                      <td>{stat.calls}</td>
+                      <td>{formatTokens(stat.tokens)}</td>
+                      <td>{formatUsd(stat.costUsd)}</td>
+                      <td>{stat.calls ? formatUsd(stat.costUsd / stat.calls) : "-"}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           )}
         </div>
 

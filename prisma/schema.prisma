@@ -234,7 +234,7 @@ model RateLimitHit {
 // "first_rating" -> "activated_10_watched".
 //
 // userId is nullable: most events belong to a signed-in user, but a
-// "landing_view" (see app/lp/[variant]/page.js) happens before anyone has
+// "landing_view" (see components/LandingPage.js) happens before anyone has
 // an account - there's no user to attach it to yet.
 model Event {
   id        String   @id @default(cuid())

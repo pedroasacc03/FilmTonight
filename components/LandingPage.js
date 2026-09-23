@@ -7,11 +7,18 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { TAGLINE } from "@/lib/brand";
+import { trackEvent, EVENT_NAMES } from "@/lib/events";
 
 export default async function LandingPage() {
   // A signed-in visitor doesn't need the pitch - send them straight in.
   const user = await getCurrentUser();
   if (user) redirect("/home");
+
+  // Anonymous (no userId yet - see the Event model) - the denominator for
+  // the landing-page conversion rate on app/admin/metrics (signups / views).
+  await trackEvent(null, EVENT_NAMES.LANDING_VIEW).catch((err) => {
+    console.error("Failed to track landing_view:", err.message);
+  });
 
   return (
     <>
