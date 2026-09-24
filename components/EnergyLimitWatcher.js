@@ -26,7 +26,12 @@ export const ENERGY_LIMIT_ERROR_CODE = "ENERGY_LIMIT_REACHED";
 
 export default function EnergyLimitWatcher() {
   const router = useRouter();
-  const [blocked, setBlocked] = useState(null); // { tier, action, energyRemaining, resetAt } | null
+  const [blocked, setBlocked] = useState(null); // { tier, action, energyRemaining, resetAt, ceiling } | null
+  // The real daily ceiling for whoever just got granted beta Pro - only
+  // known once the grant response comes back (see handleUpgradeClick),
+  // since `blocked.ceiling` still reflects the tier they were on *before*
+  // granting (their old, lower ceiling), not what they have now.
+  const [grantedCeiling, setGrantedCeiling] = useState(null);
   // "blocked" | "granting" | "granted" | "waitlisted" | "recharging" | "recharged"
   const [stage, setStage] = useState("blocked");
   const isOpenRef = useRef(false);
@@ -94,6 +99,7 @@ export default function EnergyLimitWatcher() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not process that.");
+      setGrantedCeiling(data.ceiling);
       setStage(data.granted ? "granted" : "waitlisted");
       if (data.granted) {
         // Tells NavBar (which fetches its own energy/tier status on mount)
@@ -141,13 +147,13 @@ export default function EnergyLimitWatcher() {
             <h3 style={{ marginTop: 0 }}>{isFree ? "Out of energy for today" : "Fair-use limit reached"}</h3>
             <p style={{ marginBottom: 20 }}>
               {isFree
-                ? "You're out of energy for today — it resets at midnight. Or unlock Pro free during our beta."
-                : "You've hit today's fair-use limit — it resets at midnight UTC."}
+                ? "You're out of energy for today — it resets at midnight. There's no real Pro subscription to buy yet, but you can unlock beta Pro free while spots last."
+                : `You've used all ${blocked.ceiling} of today's actions — it resets at midnight UTC.`}
             </p>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
               {isFree && (
                 <button className="btn btn-primary" onClick={handleUpgradeClick}>
-                  Unlock Pro free
+                  Unlock beta Pro free
                 </button>
               )}
               <button className="btn btn-outline" onClick={handleRechargeClick}>
@@ -160,7 +166,7 @@ export default function EnergyLimitWatcher() {
           </>
         )}
 
-        {stage === "granting" && <p style={{ margin: 0 }}>Setting up your Pro access...</p>}
+        {stage === "granting" && <p style={{ margin: 0 }}>Setting up your beta Pro access...</p>}
 
         {stage === "recharging" && <p style={{ margin: 0 }}>Adding your energy...</p>}
 
@@ -181,8 +187,10 @@ export default function EnergyLimitWatcher() {
           <>
             <h3 style={{ marginTop: 0 }}>You&apos;re in!</h3>
             <p style={{ marginBottom: 20 }}>
-              FilmTonight Pro is free during our beta — on us, while we finish rolling out billing. We&apos;ll email
-              you before anything changes.
+              You now have beta Pro — {grantedCeiling ?? 7} actions a day (recommendation batches, chat messages,
+              and Surprise Me picks combined), completely free. There&apos;s no real Pro subscription to buy yet -
+              this free access is what &quot;Pro&quot; means right now, and there&apos;s nothing automatic that
+              expires or revokes it.
             </p>
             <button className="btn btn-primary" onClick={dismiss} autoFocus>
               Let&apos;s go
@@ -194,8 +202,8 @@ export default function EnergyLimitWatcher() {
           <>
             <h3 style={{ marginTop: 0 }}>You&apos;re on the list</h3>
             <p style={{ marginBottom: 20 }}>
-              All our free beta-Pro spots are claimed right now. You&apos;re on the waitlist - we&apos;ll reach out
-              if a spot opens up.
+              All our free beta-Pro spots are claimed right now. You&apos;re on the waitlist - check back on the{" "}
+              <a href="/pro">Pro page</a> anytime to see if a spot has opened up.
             </p>
             <button className="btn btn-outline" onClick={dismiss} autoFocus>
               Got it

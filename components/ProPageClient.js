@@ -45,10 +45,10 @@ export default function ProPageClient({ tier, slots, pricing, existingInterest, 
     <>
       {alreadyPro ? (
         <div className="card" style={{ background: "var(--color-accent-100)", borderColor: "var(--color-accent-300)" }}>
-          <h3 style={{ marginTop: 0 }}>You&apos;re on Pro</h3>
+          <h3 style={{ marginTop: 0 }}>You&apos;re on {tier === "beta_pro" ? "beta Pro" : "Pro"}</h3>
           <p className="muted">
             {tier === "beta_pro"
-              ? "Free during our beta - on us, while we finish rolling out billing. We'll email you before anything changes."
+              ? `${energyStatus?.ceiling ?? 7} actions a day, completely free - there's no real Pro subscription to buy yet, so this free access is what "Pro" means right now.`
               : "Thanks for being a FilmTonight Pro subscriber."}
           </p>
         </div>
@@ -93,15 +93,17 @@ export default function ProPageClient({ tier, slots, pricing, existingInterest, 
               <div className="card" style={{ background: "var(--color-accent-100)", borderColor: "var(--color-accent-300)" }}>
                 <h3 style={{ marginTop: 0 }}>You&apos;re in!</h3>
                 <p className="muted">
-                  FilmTonight Pro is free during our beta - on us, while we finish rolling out billing. We&apos;ll
-                  email you before anything changes.
+                  You now have beta Pro - {result.ceiling ?? 7} actions a day, completely free. There&apos;s no real
+                  Pro subscription to buy yet, so this free access is what &quot;Pro&quot; means right now, and
+                  there&apos;s nothing automatic that expires or revokes it.
                 </p>
               </div>
             ) : (
               <div className="card">
                 <h3 style={{ marginTop: 0 }}>You&apos;re on the waitlist</h3>
                 <p className="muted">
-                  All our free beta-Pro spots are claimed right now. We&apos;ll reach out if a spot opens up.
+                  All our free beta-Pro spots are claimed right now. Check back on this page anytime to see if a
+                  spot has opened up.
                 </p>
               </div>
             )
@@ -109,7 +111,7 @@ export default function ProPageClient({ tier, slots, pricing, existingInterest, 
             <>
               {error && <p className="error-text">{error}</p>}
               <button className="btn btn-primary" onClick={handleUpgrade} disabled={submitting}>
-                {submitting ? "Setting up..." : slots.slotsRemaining > 0 ? "Unlock Pro free" : "Join the waitlist"}
+                {submitting ? "Setting up..." : slots.slotsRemaining > 0 ? "Unlock beta Pro free" : "Join the waitlist"}
               </button>
             </>
           )}

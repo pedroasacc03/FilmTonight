@@ -27,9 +27,15 @@ export default async function ProPage() {
       <NavBar activePath="/pro" />
       <div className="page">
         <h1>FilmTonight Pro</h1>
-        <p className="muted" style={{ maxWidth: 640, marginBottom: 32 }}>
+        <p className="muted" style={{ maxWidth: 640, marginBottom: 12 }}>
           Recommendation batches, chat messages, and Surprise Me picks each cost 1 energy. Rating titles and
           building your taste profile is always free and unlimited, on every plan.
+        </p>
+        <p className="muted" style={{ maxWidth: 640, marginBottom: 32 }}>
+          <strong>There&apos;s no real Pro subscription to buy yet</strong> - billing isn&apos;t live. While
+          we&apos;re in beta, a limited number of people can unlock full Pro access for free instead - that&apos;s
+          what &quot;beta Pro&quot; means below. The pricing further down previews what Pro will cost once real
+          billing exists; it isn&apos;t something you can pay for today.
         </p>
 
         <div className="two-col" style={{ marginBottom: 24 }}>
@@ -48,15 +54,11 @@ export default async function ProPage() {
             </ul>
           </div>
           <div className="card" style={{ borderColor: "var(--color-accent)" }}>
-            <h3 style={{ marginTop: 0, color: "var(--color-accent)" }}>Pro</h3>
+            <h3 style={{ marginTop: 0, color: "var(--color-accent)" }}>Pro (beta Pro, for now)</h3>
             <ul>
-              <li>Unlimited recommendations, chat, and Surprise Me picks*</li>
+              <li>{getEnergyCeiling("pro")} energy a day - marketed as &quot;Unlimited&quot; since real use rarely if ever hits it</li>
               <li>Everything in Free</li>
             </ul>
-            <p className="muted" style={{ fontSize: 12, margin: 0 }}>
-              *A generous fair-use limit applies behind the scenes to keep the AI costs behind the app sane - it&apos;s
-              set high enough that normal use should never bump into it.
-            </p>
           </div>
         </div>
 

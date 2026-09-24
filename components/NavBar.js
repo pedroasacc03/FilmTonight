@@ -88,7 +88,11 @@ export default function NavBar({ activePath }) {
         ))}
         {tier && (
           <Link href="/pro" className={activePath === "/pro" ? "active" : ""} onClick={() => setMenuOpen(false)}>
-            {tier === "free" ? "Upgrade" : "Pro"}
+            {/* "Beta Pro" (not just "Pro") for that tier specifically - real
+                paid Pro doesn't exist yet, and staying honest about which
+                one someone has is the whole point of naming them
+                differently in the first place (see app/pro/page.js). */}
+            {tier === "free" ? "Upgrade" : tier === "beta_pro" ? "Beta Pro" : "Pro"}
           </Link>
         )}
         {tier === "free" && energy && (
