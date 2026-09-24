@@ -8,7 +8,7 @@ import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { trackPageView } from "@/lib/events";
 import { getBetaProSlotStatus, PRICING_CONFIG } from "@/lib/proGrant";
-import { getEnergyStatus } from "@/lib/energy";
+import { getEnergyStatus, getEnergyCeiling, RECHARGE_ENERGY_AMOUNT, RECHARGE_PRICE_USD } from "@/lib/energy";
 import NavBar from "@/components/NavBar";
 import ProPageClient from "@/components/ProPageClient";
 
@@ -32,11 +32,17 @@ export default async function ProPage() {
           building your taste profile is always free and unlimited, on every plan.
         </p>
 
-        <div className="two-col" style={{ marginBottom: 40 }}>
+        <div className="two-col" style={{ marginBottom: 24 }}>
           <div className="card">
             <h3 style={{ marginTop: 0 }}>Free</h3>
             <ul>
-              <li>6 energy a day - mix and match recommendations, chat, and Surprise Me however you like</li>
+              {/* Read live rather than hardcoded - a stale copy of this
+                  number is exactly the kind of thing that quietly drifts
+                  out of sync with lib/energy.js on the next config change. */}
+              <li>
+                {getEnergyCeiling("free")} energy a day - mix and match recommendations, chat, and Surprise Me
+                however you like
+              </li>
               <li>Unlimited ratings and taste-profile building</li>
               <li>Full access to Wishlist, Watched, and My Preferences</li>
             </ul>
@@ -53,6 +59,12 @@ export default async function ProPage() {
             </p>
           </div>
         </div>
+
+        <p className="muted" style={{ maxWidth: 640, marginBottom: 40 }}>
+          Need more energy the same day, on any plan? Buy +{RECHARGE_ENERGY_AMOUNT} energy for ${RECHARGE_PRICE_USD.toFixed(2)}
+          , anytime - it stacks on top of what you already have and never expires. You&apos;ll see this offered
+          directly whenever you run out.
+        </p>
 
         <div style={{ maxWidth: 480 }}>
           <ProPageClient
