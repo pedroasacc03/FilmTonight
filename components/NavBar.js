@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEnergyStatus } from "@/components/EnergyStatusProvider";
 
 const LINKS = [
   { href: "/home", label: "Home" },
@@ -24,38 +25,15 @@ export default function NavBar({ activePath }) {
   // page transition.
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Energy status (see lib/energy.js) is fetched client-side here rather
-  // than threaded as a prop through every page that renders <NavBar> - this
-  // is the one place in the app already positioned to show it on every
-  // page. `tier` starts null so the Pro/Upgrade link doesn't flash the
-  // wrong label before the fetch resolves; `energy` stays null (renders
-  // nothing) for Pro/beta_pro and when ENERGY_SYSTEM_ENABLED=false, since
-  // the indicator must never show for a non-free tier, anywhere.
-  const [tier, setTier] = useState(null);
-  const [energy, setEnergy] = useState(null);
-
-  async function refreshEnergyStatus() {
-    try {
-      const res = await fetch("/api/energy/status");
-      if (!res.ok) return;
-      const data = await res.json();
-      setTier(data.tier ?? null);
-      setEnergy(data.status ?? null);
-    } catch {
-      // Silent - the nav still works fine without this, it just won't show
-      // the indicator this load.
-    }
-  }
-
-  useEffect(() => {
-    refreshEnergyStatus();
-    // Fired by EnergyLimitWatcher right after a successful beta-Pro grant,
-    // so the nav reflects the new tier immediately instead of waiting for
-    // the next full navigation (NavBar re-fetches on mount anyway, but a
-    // grant doesn't navigate anywhere).
-    window.addEventListener("energy:refresh", refreshEnergyStatus);
-    return () => window.removeEventListener("energy:refresh", refreshEnergyStatus);
-  }, []);
+  // Energy/tier status lives in EnergyStatusProvider (mounted once in the
+  // root layout - see that file for why NavBar can't own this itself
+  // anymore: it used to fetch locally, but NavBar is a fresh component
+  // instance on every navigation, so that meant refetching from a blank
+  // state on every single page change - a real, measured ~80-100ms flicker
+  // of the energy indicator and Upgrade/Pro link vanishing and
+  // reappearing. Reading from the provider instead means this always
+  // starts from the last-known value, not null.
+  const { tier, energy } = useEnergyStatus();
 
   async function handleLogout() {
     setMenuOpen(false);
