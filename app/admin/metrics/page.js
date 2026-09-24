@@ -17,7 +17,7 @@ import { requireUser } from "@/lib/session";
 import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { EVENT_NAMES } from "@/lib/events";
-import { getBetaProSlotStatus } from "@/lib/proGrant";
+import { getBetaProSlotStatus, PRICING_CONFIG } from "@/lib/proGrant";
 import NavBar from "@/components/NavBar";
 import AdminPosterBackfillButton from "@/components/AdminPosterBackfillButton";
 
@@ -199,11 +199,12 @@ export default async function AdminMetricsPage() {
   // Energy system (see lib/energy.js / lib/proGrant.js) - beta-Pro grants,
   // remaining slots, waitlist size, per-action EnergyLog totals, and
   // Recharge purchases.
-  const [betaProSlots, waitlistCount, energyLogRows, rechargePurchases] = await Promise.all([
+  const [betaProSlots, waitlistCount, energyLogRows, rechargePurchases, tierGroups] = await Promise.all([
     getBetaProSlotStatus(),
     prisma.proInterest.count({ where: { grantedBetaPro: false } }),
     prisma.energyLog.findMany({ select: { action: true, cost: true, blocked: true } }),
     prisma.rechargePurchase.findMany({ select: { energyAmount: true, priceUsd: true } }),
+    prisma.user.groupBy({ by: ["tier"], _count: { _all: true } }),
   ]);
   const energyStats = {};
   for (const row of ENERGY_ACTION_ROWS) {
@@ -227,6 +228,16 @@ export default async function AdminMetricsPage() {
     }),
     { count: 0, energyGranted: 0, wouldBeRevenueUsd: 0 }
   );
+
+  // Users by tier - "pro" is included even though nothing in the app can
+  // set it yet (see lib/proGrant.js), so it'll read 0 until real billing
+  // ships. Kept separate from "beta_pro" rather than folded together,
+  // since conflating a free grant with a paid tier is exactly the kind of
+  // fuzziness the rest of this system was just cleaned up to avoid.
+  const tierCountMap = Object.fromEntries(tierGroups.map((t) => [t.tier, t._count._all]));
+  const freeUserCount = tierCountMap.free || 0;
+  const betaProUserCount = tierCountMap.beta_pro || 0;
+  const proUserCount = tierCountMap.pro || 0;
 
   const ratedAtLeastOnce = watchedCounts.length;
   const activated = watchedCounts.filter((w) => w._count._all >= 10).length;
@@ -268,6 +279,19 @@ export default async function AdminMetricsPage() {
   }
   const totalAiCostUsd = Object.values(costStats).reduce((sum, s) => sum + s.costUsd, 0);
   const totalAiCalls = Object.values(costStats).reduce((sum, s) => sum + s.calls, 0);
+
+  // Real revenue is $0 - no payment processor is wired up anywhere (Recharge
+  // and beta Pro are both logged/simulated, not charged - see
+  // lib/energy.js purchaseRecharge and lib/proGrant.js). AI cost is real,
+  // though, so "net" today is just negative that cost - a pure burn number,
+  // which is expected pre-launch rather than a bug. The hypothetical Pro
+  // MRR figure is monthly-recurring by definition, while Recharge's
+  // would-be revenue is an all-time one-time sum - deliberately NOT added
+  // together below, since blending a rate with a cumulative total would
+  // produce a number that looks precise but means nothing.
+  const realRevenueUsd = 0;
+  const realNetUsd = realRevenueUsd - totalAiCostUsd;
+  const hypotheticalProMrrUsd = betaProUserCount * PRICING_CONFIG.monthly.amount;
 
   // Time-to-activation: only computable for accounts that both signed up
   // AND activated after event tracking shipped (both events need to exist).
@@ -463,6 +487,74 @@ export default async function AdminMetricsPage() {
               })}
             </tbody>
           </table>
+        </div>
+
+        <div className="card">
+          <h2>Monetization</h2>
+          <p className="muted">
+            Real revenue is $0 - there&apos;s no live payment processing anywhere in the app yet (Recharge and
+            beta Pro are both logged/simulated, not charged - see lib/energy.js purchaseRecharge and
+            lib/proGrant.js). Everything below is split accordingly: what&apos;s real, and what&apos;s a clearly
+            labeled projection of what it would be worth if billing existed today.
+          </p>
+
+          <h3 style={{ marginTop: 20, marginBottom: 4, fontSize: 14 }}>Users by tier</h3>
+          <div style={{ display: "flex", gap: 32, marginTop: 8, marginBottom: 8, flexWrap: "wrap" }}>
+            <div>
+              <div style={{ fontSize: 28, fontFamily: "var(--font-heading)", fontWeight: "var(--font-heading-weight)" }}>
+                {freeUserCount}
+              </div>
+              <div className="muted">Free</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 28, fontFamily: "var(--font-heading)", fontWeight: "var(--font-heading-weight)" }}>
+                {betaProUserCount}
+              </div>
+              <div className="muted">Beta Pro (free grant)</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 28, fontFamily: "var(--font-heading)", fontWeight: "var(--font-heading-weight)" }}>
+                {proUserCount}
+              </div>
+              <div className="muted">Pro (real, paid)</div>
+            </div>
+          </div>
+          <p className="muted" style={{ fontSize: 12, marginBottom: 20 }}>
+            Pro (real, paid) will always read 0 until real billing ships - nothing in the app can set that tier
+            today, on purpose.
+          </p>
+
+          <h3 style={{ marginTop: 20, marginBottom: 4, fontSize: 14 }}>Real (actual money)</h3>
+          <ul style={{ marginTop: 8, marginBottom: 20 }}>
+            <li>
+              Revenue collected: <strong>$0.00</strong> <span className="muted">(no payment processing exists yet)</span>
+            </li>
+            <li>
+              AI cost so far: <strong>{formatUsd(totalAiCostUsd)}</strong>{" "}
+              <span className="muted">(see the AI cost card above)</span>
+            </li>
+            <li>
+              Net: <strong>{realNetUsd < 0 ? `-${formatUsd(-realNetUsd)}` : "$0.00"}</strong>{" "}
+              <span className="muted">(a pure cost center pre-launch, by design - not a bug)</span>
+            </li>
+          </ul>
+
+          <h3 style={{ marginTop: 20, marginBottom: 4, fontSize: 14 }}>Projections (not real money)</h3>
+          <ul style={{ marginTop: 8 }}>
+            <li>
+              Recharge, if real (all-time, one-time): <strong>{formatUsd(rechargeStats.wouldBeRevenueUsd)}</strong>{" "}
+              <span className="muted">
+                across {rechargeStats.count} purchase{rechargeStats.count === 1 ? "" : "s"} at $1.99 each
+              </span>
+            </li>
+            <li>
+              Pro MRR, if beta Pro users paid {PRICING_CONFIG.monthly.label}:{" "}
+              <strong>{formatUsd(hypotheticalProMrrUsd)}/mo</strong>{" "}
+              <span className="muted">
+                ({betaProUserCount} beta Pro user{betaProUserCount === 1 ? "" : "s"} &times; {PRICING_CONFIG.monthly.label})
+              </span>
+            </li>
+          </ul>
         </div>
 
         <div className="card">
