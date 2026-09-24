@@ -197,11 +197,13 @@ export default async function AdminMetricsPage() {
   ]);
 
   // Energy system (see lib/energy.js / lib/proGrant.js) - beta-Pro grants,
-  // remaining slots, waitlist size, and per-action EnergyLog totals.
-  const [betaProSlots, waitlistCount, energyLogRows] = await Promise.all([
+  // remaining slots, waitlist size, per-action EnergyLog totals, and
+  // Recharge purchases.
+  const [betaProSlots, waitlistCount, energyLogRows, rechargePurchases] = await Promise.all([
     getBetaProSlotStatus(),
     prisma.proInterest.count({ where: { grantedBetaPro: false } }),
     prisma.energyLog.findMany({ select: { action: true, cost: true, blocked: true } }),
+    prisma.rechargePurchase.findMany({ select: { energyAmount: true, priceUsd: true } }),
   ]);
   const energyStats = {};
   for (const row of ENERGY_ACTION_ROWS) {
@@ -217,6 +219,14 @@ export default async function AdminMetricsPage() {
       stat.spentEnergy += log.cost;
     }
   }
+  const rechargeStats = rechargePurchases.reduce(
+    (acc, p) => ({
+      count: acc.count + 1,
+      energyGranted: acc.energyGranted + p.energyAmount,
+      wouldBeRevenueUsd: acc.wouldBeRevenueUsd + p.priceUsd,
+    }),
+    { count: 0, energyGranted: 0, wouldBeRevenueUsd: 0 }
+  );
 
   const ratedAtLeastOnce = watchedCounts.length;
   const activated = watchedCounts.filter((w) => w._count._all >= 10).length;
@@ -398,7 +408,8 @@ export default async function AdminMetricsPage() {
         <div className="card">
           <h2>Energy system</h2>
           <p className="muted">
-            Beta-Pro grants (see lib/proGrant.js) and per-action energy spend/blocks (see lib/energy.js).
+            Beta-Pro grants (see lib/proGrant.js), Recharge purchases and per-action energy spend/blocks (see
+            lib/energy.js).
           </p>
           <div style={{ display: "flex", gap: 32, marginTop: 12, marginBottom: 20, flexWrap: "wrap" }}>
             <div>
@@ -418,6 +429,15 @@ export default async function AdminMetricsPage() {
                 {waitlistCount}
               </div>
               <div className="muted">On the waitlist</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 28, fontFamily: "var(--font-heading)", fontWeight: "var(--font-heading-weight)" }}>
+                {rechargeStats.count}
+              </div>
+              <div className="muted">
+                Recharge purchases ({rechargeStats.energyGranted} energy granted, ${rechargeStats.wouldBeRevenueUsd.toFixed(2)}{" "}
+                would-be revenue)
+              </div>
             </div>
           </div>
           <table className="table">

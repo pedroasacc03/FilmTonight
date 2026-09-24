@@ -27,7 +27,8 @@ export const ENERGY_LIMIT_ERROR_CODE = "ENERGY_LIMIT_REACHED";
 export default function EnergyLimitWatcher() {
   const router = useRouter();
   const [blocked, setBlocked] = useState(null); // { tier, action, energyRemaining, resetAt } | null
-  const [stage, setStage] = useState("blocked"); // "blocked" | "granting" | "granted" | "waitlisted"
+  // "blocked" | "granting" | "granted" | "waitlisted" | "recharging" | "recharged"
+  const [stage, setStage] = useState("blocked");
   const isOpenRef = useRef(false);
   const lastDismissedAtRef = useRef(0);
 
@@ -106,6 +107,22 @@ export default function EnergyLimitWatcher() {
     }
   }
 
+  // Recharge (see lib/energy.js purchaseRecharge) - available to every
+  // tier, unlike the beta-Pro grant above which only makes sense for free.
+  async function handleRechargeClick() {
+    setStage("recharging");
+    try {
+      const res = await fetch("/api/energy/recharge", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Could not process that.");
+      setStage("recharged");
+      window.dispatchEvent(new Event("energy:refresh"));
+      router.refresh();
+    } catch {
+      setStage("blocked");
+    }
+  }
+
   if (!blocked) return null;
   const isFree = blocked.tier === "free";
 
@@ -133,6 +150,9 @@ export default function EnergyLimitWatcher() {
                   Unlock Pro free
                 </button>
               )}
+              <button className="btn btn-outline" onClick={handleRechargeClick}>
+                +20 energy — $1.99
+              </button>
               <button className="btn btn-outline" onClick={dismiss} autoFocus>
                 {isFree ? "Wait until tomorrow" : "Got it"}
               </button>
@@ -141,6 +161,21 @@ export default function EnergyLimitWatcher() {
         )}
 
         {stage === "granting" && <p style={{ margin: 0 }}>Setting up your Pro access...</p>}
+
+        {stage === "recharging" && <p style={{ margin: 0 }}>Adding your energy...</p>}
+
+        {stage === "recharged" && (
+          <>
+            <h3 style={{ marginTop: 0 }}>+20 energy added</h3>
+            <p style={{ marginBottom: 20 }}>
+              It&apos;s ready to use right now, stacked on top of what you already had - it won&apos;t expire at
+              midnight.
+            </p>
+            <button className="btn btn-primary" onClick={dismiss} autoFocus>
+              Let&apos;s go
+            </button>
+          </>
+        )}
 
         {stage === "granted" && (
           <>

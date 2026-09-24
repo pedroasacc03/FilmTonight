@@ -61,7 +61,11 @@ export default function ProPageClient({ tier, slots, pricing, existingInterest, 
 
           {energyStatus && (
             <p className="muted" style={{ marginBottom: 20 }}>
-              Free plan today: {energyStatus.energy}/{energyStatus.ceiling} energy remaining.
+              {/* energy can exceed ceiling after a Recharge purchase (it
+                  stacks and never expires) - "12/4" would read as a bug. */}
+              Free plan today: {energyStatus.energy}
+              {energyStatus.energy <= energyStatus.ceiling ? `/${energyStatus.ceiling}` : " (includes a Recharge top-up)"}{" "}
+              energy remaining.
             </p>
           )}
 

@@ -56,9 +56,10 @@ model User {
   chatMessages    ChatMessage[]
   rateLimitHits   RateLimitHit[]
   events          Event[]
-  energy          UserEnergy?
-  energyLogs      EnergyLog[]
-  proInterest     ProInterest?
+  energy             UserEnergy?
+  energyLogs         EnergyLog[]
+  proInterest        ProInterest?
+  rechargePurchases  RechargePurchase[]
 }
 
 // A movie or TV show. This is our local cache of whatever the AI Engine found
@@ -335,4 +336,31 @@ model ProInterest {
   grantedAt      DateTime?
 
   createdAt DateTime @default(now())
+}
+
+// One row per "Recharge" top-up (see lib/energy.js purchaseRecharge) - a
+// user buying +20 energy on top of their current balance, available to any
+// tier. Unlike ProInterest (one row per user, a one-time grant decision),
+// this is repeatable - a user can buy multiple recharges - so it's its own
+// table rather than reusing ProInterest's shape. Fake/logged today, same as
+// the rest of this system: no real Stripe charge happens (see that
+// function's TODO), this row is what "the would-be purchase" means until
+// real billing exists. energyAmount/priceUsd are stored per-row (not just
+// read from today's constants) so a future price/amount change doesn't
+// silently rewrite the meaning of historical purchases.
+model RechargePurchase {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  energyAmount Int
+  priceUsd     Float
+  // The user's tier at purchase time - Recharge grants the same amount
+  // regardless of tier, but worth recording for analytics (see lib/energy.js
+  // RECHARGE_ENERGY_AMOUNT's comment on why the amount is tier-independent).
+  tier String
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
 }

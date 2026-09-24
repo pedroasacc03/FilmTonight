@@ -96,9 +96,19 @@ export default function NavBar({ activePath }) {
             href="/pro"
             className="energy-indicator"
             onClick={() => setMenuOpen(false)}
-            title={`${energy.energy}/${energy.ceiling} energy today - resets at midnight UTC`}
+            title={
+              energy.energy > energy.ceiling
+                ? `${energy.energy} energy (includes a Recharge top-up) - resets to ${energy.ceiling}/day at midnight UTC`
+                : `${energy.energy}/${energy.ceiling} energy today - resets at midnight UTC`
+            }
           >
-            <span aria-hidden="true">⚡</span> {energy.energy}/{energy.ceiling}
+            {/* A Recharge purchase can push energy above the daily ceiling
+                (it stacks and never expires - see lib/energy.js
+                purchaseRecharge) - "12/4" would read as a bug, so once
+                energy exceeds the ceiling this drops the "/ceiling" part
+                and just shows the raw total instead. */}
+            <span aria-hidden="true">⚡</span>{" "}
+            {energy.energy > energy.ceiling ? energy.energy : `${energy.energy}/${energy.ceiling}`}
           </Link>
         )}
         <Link href="/privacy" style={{ fontSize: 12, opacity: 0.7 }} onClick={() => setMenuOpen(false)}>
