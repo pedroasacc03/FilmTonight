@@ -25,15 +25,44 @@ export default async function ProPage() {
   return (
     <>
       <NavBar activePath="/pro" />
-      <div className="page narrow">
+      <div className="page">
         <h1>FilmTonight Pro</h1>
-        <ProPageClient
-          tier={user.tier}
-          slots={slots}
-          pricing={PRICING_CONFIG}
-          existingInterest={existingInterest}
-          energyStatus={energyStatus}
-        />
+        <p className="muted" style={{ maxWidth: 640, marginBottom: 32 }}>
+          Recommendation batches, chat messages, and Surprise Me picks each cost 1 energy. Rating titles and
+          building your taste profile is always free and unlimited, on every plan.
+        </p>
+
+        <div className="two-col" style={{ marginBottom: 40 }}>
+          <div className="card">
+            <h3 style={{ marginTop: 0 }}>Free</h3>
+            <ul>
+              <li>6 energy a day - mix and match recommendations, chat, and Surprise Me however you like</li>
+              <li>Unlimited ratings and taste-profile building</li>
+              <li>Full access to Wishlist, Watched, and My Preferences</li>
+            </ul>
+          </div>
+          <div className="card" style={{ borderColor: "var(--color-accent)" }}>
+            <h3 style={{ marginTop: 0, color: "var(--color-accent)" }}>Pro</h3>
+            <ul>
+              <li>Unlimited recommendations, chat, and Surprise Me picks*</li>
+              <li>Everything in Free</li>
+            </ul>
+            <p className="muted" style={{ fontSize: 12, margin: 0 }}>
+              *A generous fair-use limit applies behind the scenes to keep the AI costs behind the app sane - it&apos;s
+              set high enough that normal use should never bump into it.
+            </p>
+          </div>
+        </div>
+
+        <div style={{ maxWidth: 480 }}>
+          <ProPageClient
+            tier={user.tier}
+            slots={slots}
+            pricing={PRICING_CONFIG}
+            existingInterest={existingInterest}
+            energyStatus={energyStatus}
+          />
+        </div>
       </div>
     </>
   );
