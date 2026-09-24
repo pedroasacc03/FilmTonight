@@ -10,6 +10,7 @@ import { listRecommendations, generateRecommendations, checkRecommendationEligib
 import { maybeAnalyzePreferences } from "@/lib/profile";
 import { checkRateLimit, formatRetryAfter } from "@/lib/rateLimit";
 import { trackWatchedMilestones, trackEvent } from "@/lib/events";
+import { checkAndSpendEnergy, refundEnergy, buildEnergyLimitBody } from "@/lib/energy";
 
 // Maps a Recommendation-card triage action to the underlying Rating status -
 // the two use different vocabularies (Recommendation has no "want_to_watch").
@@ -52,6 +53,14 @@ export async function POST(request) {
     );
   }
 
+  // Real product-tier gating (unlike the rate limit above, which is an
+  // abuse backstop) - UI gating is a courtesy only, this is the actual
+  // control. See lib/energy.js.
+  const energyResult = await checkAndSpendEnergy(user.id, user.tier, "recommendation_batch");
+  if (!energyResult.allowed) {
+    return NextResponse.json(buildEnergyLimitBody(energyResult), { status: 429 });
+  }
+
   try {
     const created = await generateRecommendations(user.id);
     trackEvent(user.id, "recommendations_generated", { count: created.length }).catch((err) => {
@@ -59,6 +68,9 @@ export async function POST(request) {
     });
     return NextResponse.json({ created });
   } catch (err) {
+    // The energy was already spent above - refund it, since this failure is
+    // an unrelated API/timeout error, not the user "using up" their action.
+    await refundEnergy(user.id, "recommendation_batch").catch(() => {});
     console.error("Failed to generate recommendations:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

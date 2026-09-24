@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ENERGY_LIMIT_ERROR_CODE } from "@/components/EnergyLimitWatcher";
 
 const SUGGESTIONS = [
   "Top 5 shows for me right now",
@@ -44,7 +45,12 @@ export default function ChatPageClient({ initialMessages }) {
         body: JSON.stringify({ message: trimmed }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "The chatbot ran into a problem.");
+      if (!res.ok) {
+        // Already communicated by the global EnergyLimitWatcher modal -
+        // don't also show its raw machine code as an inline error here.
+        if (data.error === ENERGY_LIMIT_ERROR_CODE) return;
+        throw new Error(data.error || "The chatbot ran into a problem.");
+      }
       setMessages((prev) => [...prev, { id: `reply-${Date.now()}`, role: "assistant", content: data.reply }]);
     } catch (err) {
       setError(err.message);

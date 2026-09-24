@@ -258,6 +258,24 @@ code {
   border-color: var(--color-accent);
   color: var(--color-accent-700);
 }
+/* Free-tier daily energy indicator (see lib/energy.js) - never shown for
+   Pro/beta_pro, anywhere. Doubles as a nudge toward /pro. */
+.energy-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--color-accent-100);
+  color: var(--color-accent-800) !important;
+  border: var(--border-thick) solid var(--color-accent-300);
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  font-size: var(--text-caption);
+  font-weight: 700;
+}
+.energy-indicator:hover {
+  border-color: var(--color-accent);
+  text-decoration: none;
+}
 .navbar-menu-toggle {
   display: none;
   background: transparent;
@@ -820,6 +838,15 @@ textarea {
   padding: 24px;
   max-width: 420px;
   width: 100%;
+}
+
+/* --- Energy-limit notification - deliberately weightier than a plain
+   .modal-box (an amber glow ring, not just a border), since hitting zero
+   energy is rarer and more consequential than the routine confirmations
+   the plain modal styling is normally used for (rate/skip, clear chat). --- */
+.energy-limit-modal {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-accent) 20%, transparent), var(--shadow-lg);
 }
 
 .section-title {

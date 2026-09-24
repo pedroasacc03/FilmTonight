@@ -17,6 +17,7 @@ import { requireUser } from "@/lib/session";
 import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 import { EVENT_NAMES } from "@/lib/events";
+import { getBetaProSlotStatus } from "@/lib/proGrant";
 import NavBar from "@/components/NavBar";
 import AdminPosterBackfillButton from "@/components/AdminPosterBackfillButton";
 
@@ -80,7 +81,17 @@ const PAGE_LABELS = {
   recommendations: "Recommendations",
   preferences: "My Preferences",
   chat: "Chat",
+  pro: "Pro",
 };
+
+// Matches lib/energy.js's EnergyLog.action values, plus display labels for
+// the "Energy log totals" card below.
+const ENERGY_ACTION_ROWS = [
+  { name: "recommendation_batch", label: "Recommendation batch" },
+  { name: "surprise_me", label: "Surprise Me pick" },
+  { name: "chat_message", label: "Chat message" },
+  { name: "taste_profile_analysis", label: "Taste-profile analysis (never blocked)" },
+];
 
 function pct(part, total) {
   if (!total) return "0%";
@@ -184,6 +195,28 @@ export default async function AdminMetricsPage() {
     prisma.title.count({ where: { posterUrl: null } }),
     prisma.title.findFirst({ orderBy: { lastRefreshed: "asc" }, select: { name: true, lastRefreshed: true } }),
   ]);
+
+  // Energy system (see lib/energy.js / lib/proGrant.js) - beta-Pro grants,
+  // remaining slots, waitlist size, and per-action EnergyLog totals.
+  const [betaProSlots, waitlistCount, energyLogRows] = await Promise.all([
+    getBetaProSlotStatus(),
+    prisma.proInterest.count({ where: { grantedBetaPro: false } }),
+    prisma.energyLog.findMany({ select: { action: true, cost: true, blocked: true } }),
+  ]);
+  const energyStats = {};
+  for (const row of ENERGY_ACTION_ROWS) {
+    energyStats[row.name] = { spent: 0, spentEnergy: 0, blocked: 0 };
+  }
+  for (const log of energyLogRows) {
+    const stat = energyStats[log.action];
+    if (!stat) continue;
+    if (log.blocked) {
+      stat.blocked += 1;
+    } else {
+      stat.spent += 1;
+      stat.spentEnergy += log.cost;
+    }
+  }
 
   const ratedAtLeastOnce = watchedCounts.length;
   const activated = watchedCounts.filter((w) => w._count._all >= 10).length;
@@ -360,6 +393,56 @@ export default async function AdminMetricsPage() {
             )}
           </ul>
           <AdminPosterBackfillButton />
+        </div>
+
+        <div className="card">
+          <h2>Energy system</h2>
+          <p className="muted">
+            Beta-Pro grants (see lib/proGrant.js) and per-action energy spend/blocks (see lib/energy.js).
+          </p>
+          <div style={{ display: "flex", gap: 32, marginTop: 12, marginBottom: 20, flexWrap: "wrap" }}>
+            <div>
+              <div style={{ fontSize: 28, fontFamily: "var(--font-heading)", fontWeight: "var(--font-heading-weight)" }}>
+                {betaProSlots.grantedCount}
+              </div>
+              <div className="muted">Beta-Pro grants issued</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 28, fontFamily: "var(--font-heading)", fontWeight: "var(--font-heading-weight)" }}>
+                {betaProSlots.slotsRemaining} / {betaProSlots.maxSlots}
+              </div>
+              <div className="muted">Slots remaining</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 28, fontFamily: "var(--font-heading)", fontWeight: "var(--font-heading-weight)" }}>
+                {waitlistCount}
+              </div>
+              <div className="muted">On the waitlist</div>
+            </div>
+          </div>
+          <table className="table">
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Spent</th>
+                <th>Energy spent</th>
+                <th>Blocked</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ENERGY_ACTION_ROWS.map((row) => {
+                const stat = energyStats[row.name];
+                return (
+                  <tr key={row.name}>
+                    <td>{row.label}</td>
+                    <td>{stat.spent}</td>
+                    <td>{stat.spentEnergy}</td>
+                    <td>{stat.blocked}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
 
         <div className="card">

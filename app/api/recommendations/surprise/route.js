@@ -7,6 +7,7 @@ import { getCurrentUserFromRequest } from "@/lib/session";
 import { generateSurprisePick, checkRecommendationEligibility } from "@/lib/recommendations";
 import { checkRateLimit, formatRetryAfter } from "@/lib/rateLimit";
 import { trackEvent } from "@/lib/events";
+import { checkAndSpendEnergy, refundEnergy, buildEnergyLimitBody } from "@/lib/energy";
 
 export async function POST(request) {
   const user = await getCurrentUserFromRequest(request);
@@ -34,9 +35,18 @@ export async function POST(request) {
     );
   }
 
+  const energyResult = await checkAndSpendEnergy(user.id, user.tier, "surprise_me");
+  if (!energyResult.allowed) {
+    return NextResponse.json(buildEnergyLimitBody(energyResult), { status: 429 });
+  }
+
   try {
     const created = await generateSurprisePick(user.id);
     if (!created) {
+      // Not a real failure (Claude just couldn't find a fresh pick, e.g.
+      // both attempts collided with an already-known title) - still refund,
+      // since the user didn't get anything for this energy.
+      await refundEnergy(user.id, "surprise_me").catch(() => {});
       return NextResponse.json({ error: "Couldn't come up with a surprise pick this time - try again." }, { status: 500 });
     }
     trackEvent(user.id, "surprise_pick_generated").catch((err) => {
@@ -44,6 +54,7 @@ export async function POST(request) {
     });
     return NextResponse.json({ created });
   } catch (err) {
+    await refundEnergy(user.id, "surprise_me").catch(() => {});
     console.error("Failed to generate surprise pick:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

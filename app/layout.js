@@ -1,4 +1,5 @@
 import "./globals.css";
+import EnergyLimitWatcher from "@/components/EnergyLimitWatcher";
 
 // Absolute base URL social crawlers (LinkedIn, Instagram bio link previews,
 // Twitter/X, etc.) resolve the relative og:image URL against - without this,
@@ -40,6 +41,11 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         {children}
+        {/* Global fetch interceptor + notification for the energy system
+            (see lib/energy.js) - a client component rendered from this
+            server layout, not a reason to make the whole layout a client
+            component. Present on every page so every fetch is covered. */}
+        <EnergyLimitWatcher />
         {/* TMDB's API Terms of Use require attribution wherever their data
             is shown - true of nearly every page here (title names, genres,
             posters, streaming availability all come from them - see

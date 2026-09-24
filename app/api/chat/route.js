@@ -12,6 +12,7 @@ import { getCurrentUserFromRequest } from "@/lib/session";
 import { handleChatMessage } from "@/lib/chat";
 import { checkRateLimit, formatRetryAfter } from "@/lib/rateLimit";
 import { trackEvent } from "@/lib/events";
+import { checkAndSpendEnergy, refundEnergy, buildEnergyLimitBody } from "@/lib/energy";
 
 export async function GET(request) {
   const user = await getCurrentUserFromRequest(request);
@@ -40,6 +41,11 @@ export async function POST(request) {
   const message = body?.message?.trim();
   if (!message) return NextResponse.json({ error: "Message cannot be empty." }, { status: 400 });
 
+  const energyResult = await checkAndSpendEnergy(user.id, user.tier, "chat_message");
+  if (!energyResult.allowed) {
+    return NextResponse.json(buildEnergyLimitBody(energyResult), { status: 429 });
+  }
+
   try {
     const reply = await handleChatMessage(user.id, message);
     trackEvent(user.id, "chat_message_sent").catch((err) => {
@@ -47,6 +53,7 @@ export async function POST(request) {
     });
     return NextResponse.json({ reply });
   } catch (err) {
+    await refundEnergy(user.id, "chat_message").catch(() => {});
     console.error("Chat failed:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

@@ -42,6 +42,13 @@ model User {
   streamingServices     String  @default("[]")
   openToOtherStreaming  Boolean @default(true)
 
+  // "free" | "beta_pro" | "pro" - see lib/energy.js for what each tier's
+  // daily energy ceiling is. beta_pro and pro are deliberately
+  // indistinguishable to the energy system (same ceiling, same "Unlimited"
+  // marketing) - beta_pro is just how a free Stripe-less grant got here
+  // (see lib/proGrant.js). Real Stripe billing later sets "pro" directly.
+  tier String @default("free")
+
   ratings         Rating[]
   guidedAnswers   GuidedAnswer[]
   profile         PreferenceProfile?
@@ -49,6 +56,9 @@ model User {
   chatMessages    ChatMessage[]
   rateLimitHits   RateLimitHit[]
   events          Event[]
+  energy          UserEnergy?
+  energyLogs      EnergyLog[]
+  proInterest     ProInterest?
 }
 
 // A movie or TV show. This is our local cache of whatever the AI Engine found
@@ -247,4 +257,82 @@ model Event {
 
   @@index([name, createdAt])
   @@index([userId, name])
+}
+
+// One row per user, tracking their daily "energy" balance - the Duolingo-
+// style resource that gates the three metered AI actions (recommendation
+// batches, chat messages, Surprise Me picks - see lib/energy.js). Taste-
+// profile analysis is NOT metered here; it's a side effect of rating, not
+// something a user consciously spends energy on (see lastProfileAnalysisAt
+// below and lib/profile.js maybeAnalyzePreferences).
+//
+// Refilled lazily, inline on each request (checked against lastRefillAt),
+// not via a cron job - see lib/energy.js refillIfStale. This row is
+// lazily created (upserted) the first time it's needed too, so accounts
+// that existed before this feature shipped don't need a migration.
+model UserEnergy {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  energy       Int      @default(6)
+  lastRefillAt DateTime @default(now())
+
+  // Debounce timestamp for taste-profile analysis (at most once per rolling
+  // 24h, regardless of rating volume) - completely separate from `energy`
+  // above, since this action never draws from the user's visible balance.
+  lastProfileAnalysisAt DateTime?
+
+  updatedAt DateTime @updatedAt
+}
+
+// Append-only log of every energy-gated action attempt (spent or blocked)
+// and every taste-profile analysis run - see lib/energy.js. Two purposes:
+// cost/usage visibility on app/admin/metrics, and an audit trail for
+// disputes ("why was I blocked?"). Deliberately separate from the
+// dollar-cost Event log in lib/events.js (COST_* events) - this one is
+// energy-economy accounting (integer costs, tier-aware), that one is raw
+// token/$ observability; they're cross-referenced by admin metrics but
+// serve different questions.
+model EnergyLog {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // "recommendation_batch" | "chat_message" | "surprise_me" | "taste_profile_analysis"
+  action String
+  // Energy units. Always 1 today (all three metered actions are weighted
+  // equally - see lib/energy.js ACTION_ENERGY_COST) - kept as an Int rather
+  // than a fixed constant so a future re-weighting doesn't need a schema
+  // change, just new log rows going forward.
+  cost Int
+  // True for a metered action that was rejected for lack of energy. Always
+  // false for "taste_profile_analysis" rows - that action never blocks.
+  blocked Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+// One row per user who has either been granted beta Pro (free, no payment -
+// see lib/proGrant.js createProUpgradeIntent) or landed on the waitlist
+// after the BETA_PRO_MAX_SLOTS cap was reached. Doubles as lightweight
+// monetization-interest signal for when real Stripe billing replaces this -
+// billingCycleSelected/source capture what the person actually clicked on,
+// which is the exact data a future pricing/paywall decision would want.
+model ProInterest {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  email String
+  // "blocked_notification" | "pro_page_nav" - where the upgrade click came from.
+  source String
+  // "monthly" | "annual" - see lib/proGrant.js PRICING_CONFIG.
+  billingCycleSelected String
+
+  grantedBetaPro Boolean   @default(false)
+  grantedAt      DateTime?
+
+  createdAt DateTime @default(now())
 }

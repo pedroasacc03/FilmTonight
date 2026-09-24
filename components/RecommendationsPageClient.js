@@ -9,6 +9,7 @@ import Toast from "@/components/Toast";
 import { useToast } from "@/lib/useToast";
 import NotInterestedModal from "@/components/NotInterestedModal";
 import RateModal from "@/components/RateModal";
+import { ENERGY_LIMIT_ERROR_CODE } from "@/components/EnergyLimitWatcher";
 
 const SOURCE_BADGES = {
   ai_new: { label: "New — never mentioned", className: "badge-new" },
@@ -59,7 +60,11 @@ export default function RecommendationsPageClient({ initialRecommendations, init
     try {
       const res = await fetch("/api/recommendations", { method: "POST" });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Could not generate recommendations.");
+      if (!res.ok) {
+        // Already communicated by the global EnergyLimitWatcher modal.
+        if (data.error === ENERGY_LIMIT_ERROR_CODE) return;
+        throw new Error(data.error || "Could not generate recommendations.");
+      }
       await refresh();
       const count = data.created?.length || 0;
       showToast(
@@ -82,7 +87,11 @@ export default function RecommendationsPageClient({ initialRecommendations, init
     try {
       const res = await fetch("/api/recommendations/surprise", { method: "POST" });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Could not generate a surprise pick.");
+      if (!res.ok) {
+        // Already communicated by the global EnergyLimitWatcher modal.
+        if (data.error === ENERGY_LIMIT_ERROR_CODE) return;
+        throw new Error(data.error || "Could not generate a surprise pick.");
+      }
       await refresh();
       showToast(`Found something different: "${data.created?.title?.name}"`, "See why below - give it a shot!");
     } catch (err) {

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword, createSessionToken, SESSION_COOKIE_NAME, SESSION_MAX_AGE_SECONDS } from "@/lib/auth";
 import { trackEvent } from "@/lib/events";
+import { getEnergyCeiling } from "@/lib/energy";
 
 export async function POST(request) {
   const body = await request.json().catch(() => null);
@@ -34,6 +35,14 @@ export async function POST(request) {
 
   const user = await prisma.user.create({
     data: { email, name, passwordHash: hashPassword(password), privacyConsentAt: new Date() },
+  });
+
+  // Brand-new signups start with a full energy bar (tier defaults to "free"
+  // at the schema level - see lib/energy.js for the ceiling). Created
+  // eagerly here rather than relying solely on lazy upsert-on-first-use, so
+  // this is true from the very first page load, not just the first action.
+  await prisma.userEnergy.create({ data: { userId: user.id, energy: getEnergyCeiling("free") } }).catch((err) => {
+    console.error("Failed to create initial UserEnergy row:", err.message);
   });
 
   // Never let an event-tracking hiccup break registration itself.
