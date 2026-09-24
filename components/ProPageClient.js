@@ -54,20 +54,9 @@ export default function ProPageClient({ tier, slots, pricing, existingInterest, 
         </div>
       ) : (
         <>
-          <p className="muted" style={{ marginBottom: 24 }}>
-            Free during beta - this is what it&apos;ll cost after. {slots.slotsRemaining} of {slots.maxSlots} free
-            beta spots left.
+          <p className="muted" style={{ marginBottom: 16 }}>
+            {slots.slotsRemaining} of {slots.maxSlots} free beta spots left.
           </p>
-
-          {energyStatus && (
-            <p className="muted" style={{ marginBottom: 20 }}>
-              {/* energy can exceed ceiling after a Recharge purchase (it
-                  stacks and never expires) - "12/4" would read as a bug. */}
-              Free plan today: {energyStatus.energy}
-              {energyStatus.energy <= energyStatus.ceiling ? `/${energyStatus.ceiling}` : " (includes a Recharge top-up)"}{" "}
-              energy remaining.
-            </p>
-          )}
 
           <div className="chip-row" style={{ marginBottom: 20 }}>
             <button
@@ -113,6 +102,15 @@ export default function ProPageClient({ tier, slots, pricing, existingInterest, 
               <button className="btn btn-primary" onClick={handleUpgrade} disabled={submitting}>
                 {submitting ? "Setting up..." : slots.slotsRemaining > 0 ? "Unlock beta Pro free" : "Join the waitlist"}
               </button>
+              {energyStatus && (
+                <p className="muted" style={{ marginTop: 12, fontSize: 12 }}>
+                  {/* energy can exceed ceiling after a Recharge purchase (it
+                      stacks and never expires) - "12/4" would read as a bug. */}
+                  Free plan today: {energyStatus.energy}
+                  {energyStatus.energy <= energyStatus.ceiling ? `/${energyStatus.ceiling}` : " (includes a Recharge top-up)"}{" "}
+                  energy remaining.
+                </p>
+              )}
             </>
           )}
         </>

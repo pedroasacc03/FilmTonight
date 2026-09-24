@@ -27,15 +27,9 @@ export default async function ProPage() {
       <NavBar activePath="/pro" />
       <div className="page">
         <h1>FilmTonight Pro</h1>
-        <p className="muted" style={{ maxWidth: 640, marginBottom: 12 }}>
-          Recommendation batches, chat messages, and Surprise Me picks each cost 1 energy. Rating titles and
-          building your taste profile is always free and unlimited, on every plan.
-        </p>
-        <p className="muted" style={{ maxWidth: 640, marginBottom: 32 }}>
-          <strong>There&apos;s no real Pro subscription to buy yet</strong> - billing isn&apos;t live. While
-          we&apos;re in beta, a limited number of people can unlock full Pro access for free instead - that&apos;s
-          what &quot;beta Pro&quot; means below. The pricing further down previews what Pro will cost once real
-          billing exists; it isn&apos;t something you can pay for today.
+        <p className="muted" style={{ maxWidth: 640, marginBottom: 24 }}>
+          Recommendations, chat, and Surprise Me each cost 1 energy - rating and taste-profile building are always
+          free. Billing isn&apos;t live yet, so beta Pro below is completely free while spots last.
         </p>
 
         <div className="two-col" style={{ marginBottom: 24 }}>
@@ -54,7 +48,24 @@ export default async function ProPage() {
             </ul>
           </div>
           <div className="card" style={{ borderColor: "var(--color-accent)" }}>
-            <h3 style={{ marginTop: 0, color: "var(--color-accent)" }}>Pro (beta Pro, for now)</h3>
+            <h3 style={{ marginTop: 0, color: "var(--color-accent)" }}>Pro</h3>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4 }}>
+              <span
+                style={{
+                  fontSize: 40,
+                  lineHeight: 1,
+                  fontFamily: "var(--font-heading)",
+                  fontWeight: "var(--font-heading-weight)",
+                  color: "var(--color-accent)",
+                }}
+              >
+                {PRICING_CONFIG.monthly.label}
+              </span>
+              <span className="muted">or {PRICING_CONFIG.annual.label}</span>
+            </div>
+            <span className="chip chip-neutral" style={{ fontSize: 12, marginBottom: 12, display: "inline-block" }}>
+              Free right now - beta access
+            </span>
             <ul>
               <li>{getEnergyCeiling("pro")} energy a day - marketed as &quot;Unlimited&quot; since real use rarely if ever hits it</li>
               <li>Everything in Free</li>
@@ -62,13 +73,7 @@ export default async function ProPage() {
           </div>
         </div>
 
-        <p className="muted" style={{ maxWidth: 640, marginBottom: 40 }}>
-          Need more energy the same day, on any plan? Buy +{RECHARGE_ENERGY_AMOUNT} energy for ${RECHARGE_PRICE_USD.toFixed(2)}
-          , anytime - it stacks on top of what you already have and never expires. You&apos;ll see this offered
-          directly whenever you run out.
-        </p>
-
-        <div style={{ maxWidth: 480 }}>
+        <div style={{ maxWidth: 480, marginBottom: 32 }}>
           <ProPageClient
             tier={user.tier}
             slots={slots}
@@ -77,6 +82,12 @@ export default async function ProPage() {
             energyStatus={energyStatus}
           />
         </div>
+
+        <p className="muted" style={{ maxWidth: 640 }}>
+          Need more energy the same day, on any plan? Buy +{RECHARGE_ENERGY_AMOUNT} energy for ${RECHARGE_PRICE_USD.toFixed(2)}
+          , anytime - it stacks on what you already have, never expires, and is offered automatically whenever you
+          run out.
+        </p>
       </div>
     </>
   );
