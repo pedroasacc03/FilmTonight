@@ -157,7 +157,7 @@ export default function EnergyLimitWatcher() {
                 </button>
               )}
               <button className="btn btn-outline" onClick={handleRechargeClick}>
-                +20 energy — $1.99
+                Get +20 energy free
               </button>
               <button className="btn btn-outline" onClick={dismiss} autoFocus>
                 {isFree ? "Wait until tomorrow" : "Got it"}
@@ -175,7 +175,7 @@ export default function EnergyLimitWatcher() {
             <h3 style={{ marginTop: 0 }}>+20 energy added</h3>
             <p style={{ marginBottom: 20 }}>
               It&apos;s ready to use right now, stacked on top of what you already had - it won&apos;t expire at
-              midnight.
+              midnight. Recharge is free during beta (normally $1.99), so you weren&apos;t charged anything.
             </p>
             <button className="btn btn-primary" onClick={dismiss} autoFocus>
               Let&apos;s go

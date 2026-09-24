@@ -11,6 +11,7 @@ import { getBetaProSlotStatus, PRICING_CONFIG } from "@/lib/proGrant";
 import { getEnergyStatus, getEnergyCeiling, RECHARGE_ENERGY_AMOUNT, RECHARGE_PRICE_USD } from "@/lib/energy";
 import NavBar from "@/components/NavBar";
 import ProPageClient from "@/components/ProPageClient";
+import RechargeCard from "@/components/RechargeCard";
 
 export default async function ProPage() {
   const user = await requireUser();
@@ -73,7 +74,7 @@ export default async function ProPage() {
           </div>
         </div>
 
-        <div style={{ maxWidth: 480, marginBottom: 32 }}>
+        <div style={{ maxWidth: 480, marginBottom: 8 }}>
           <ProPageClient
             tier={user.tier}
             slots={slots}
@@ -83,11 +84,9 @@ export default async function ProPage() {
           />
         </div>
 
-        <p className="muted" style={{ maxWidth: 640 }}>
-          Need more energy the same day, on any plan? Buy +{RECHARGE_ENERGY_AMOUNT} energy for ${RECHARGE_PRICE_USD.toFixed(2)}
-          , anytime - it stacks on what you already have, never expires, and is offered automatically whenever you
-          run out.
-        </p>
+        <div style={{ maxWidth: 640, marginTop: 24 }}>
+          <RechargeCard energyAmount={RECHARGE_ENERGY_AMOUNT} priceUsd={RECHARGE_PRICE_USD} />
+        </div>
       </div>
     </>
   );
