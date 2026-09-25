@@ -179,7 +179,6 @@ export default function PreferencesPageClient({ initialProfile, initialUserMeta 
   );
   const [userMeta, setUserMeta] = useState(initialUserMeta);
   const [saving, setSaving] = useState(false);
-  const [reanalyzing, setReanalyzing] = useState(false);
   const [toast, showToast, dismissToast] = useToast();
 
   // Sends a partial update to the server. `body` can mix profile fields
@@ -217,20 +216,6 @@ export default function PreferencesPageClient({ initialProfile, initialUserMeta 
     showToast("Saved!", guidance);
   }
 
-  async function handleReanalyze() {
-    setReanalyzing(true);
-    try {
-      const res = await fetch("/api/preferences", { method: "POST" });
-      const data = await res.json();
-      if (res.ok && data.profile) {
-        setProfile(data.profile);
-        showToast("Profile re-analyzed!", "Check out what's new below.");
-      }
-    } finally {
-      setReanalyzing(false);
-    }
-  }
-
   const hasAnyData =
     profile.generalLikes?.length ||
     profile.genres?.length ||
@@ -241,16 +226,14 @@ export default function PreferencesPageClient({ initialProfile, initialUserMeta 
     <>
       {toast && <Toast key={toast.key} message={toast.message} guidance={toast.guidance} onDismiss={dismissToast} />}
 
-      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 16 }}>
+      <div style={{ marginBottom: 16 }}>
         <p className="muted" style={{ maxWidth: 600 }}>
           Inspired by Instagram&apos;s &quot;Your Algorithm&quot; page — full transparency into what drives your
           recommendations. Edit anything below; changes are saved automatically and reshape your recommendations
           right away. This whole page is built from your ratings, so the more you rate on the{" "}
-          <a href="/ratings">Ratings page</a>, the richer and more accurate everything here gets.
+          <a href="/ratings">Ratings page</a>, the richer and more accurate everything here gets - your profile
+          refreshes automatically as you rate, wishlist, or mark something not interested.
         </p>
-        <button className="btn btn-outline" onClick={handleReanalyze} disabled={reanalyzing}>
-          {reanalyzing ? "Analyzing..." : "Ask AI to re-analyze"}
-        </button>
       </div>
 
       {!hasAnyData && (

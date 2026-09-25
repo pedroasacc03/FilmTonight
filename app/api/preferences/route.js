@@ -1,10 +1,18 @@
 // GET   /api/preferences - fetch the current user's profile (the "My Preferences" page)
 // PATCH /api/preferences - manual edit of one or more fields (treated just like a rating - see lib/profile.js)
-// POST  /api/preferences - "Ask AI to re-analyze" - force a fresh analysis run
+//
+// There used to be a POST here too - "Ask AI to re-analyze", an explicit,
+// uncapped button on My Preferences that re-ran the priciest single AI call
+// in the app on demand. Removed: every real signal change (rate, wishlist,
+// mark not-interested, delete a rating) already triggers a refresh on its
+// own - see lib/profile.js maybeAnalyzePreferences (batched + a 24h debounce
+// via lib/energy.js tryClaimProfileAnalysisSlot) and the direct
+// analyzePreferences call in DELETE /api/ratings - so the button was mostly
+// just a way to burn tokens re-processing data that hadn't changed.
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserFromRequest } from "@/lib/session";
-import { getProfile, updateProfile, analyzePreferences } from "@/lib/profile";
+import { getProfile, updateProfile } from "@/lib/profile";
 import { trackEvent } from "@/lib/events";
 
 export async function GET(request) {
@@ -56,20 +64,4 @@ export async function PATCH(request) {
   });
 
   return NextResponse.json({ profile });
-}
-
-export async function POST(request) {
-  const user = await getCurrentUserFromRequest(request);
-  if (!user) return NextResponse.json({ error: "Not signed in." }, { status: 401 });
-
-  try {
-    const profile = await analyzePreferences(user.id);
-    trackEvent(user.id, "profile_reanalyzed").catch((err) => {
-      console.error("Failed to track profile_reanalyzed:", err.message);
-    });
-    return NextResponse.json({ profile });
-  } catch (err) {
-    console.error("Re-analysis failed:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
-  }
 }
