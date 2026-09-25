@@ -20,6 +20,7 @@ import { EVENT_NAMES } from "@/lib/events";
 import { getBetaProSlotStatus, PRICING_CONFIG } from "@/lib/proGrant";
 import NavBar from "@/components/NavBar";
 import AdminPosterBackfillButton from "@/components/AdminPosterBackfillButton";
+import AdminEnergyBackfillButton from "@/components/AdminEnergyBackfillButton";
 
 const EVENT_LABELS = {
   [EVENT_NAMES.SIGNUP]: "Signed up",
@@ -487,6 +488,13 @@ export default async function AdminMetricsPage() {
               })}
             </tbody>
           </table>
+          <p className="muted" style={{ marginTop: 16, fontSize: 12 }}>
+            One-off fix for accounts whose energy balance predates FREE_DAILY_ENERGY being tightened from 6 to 4 -
+            refillIfStale only ever refills up, never down, so an old balance of 6 just sits there until spent. Safe
+            to click anytime - never touches legitimate Recharge surplus (see lib/energy.js
+            backfillStaleEnergyCeilings).
+          </p>
+          <AdminEnergyBackfillButton />
         </div>
 
         <div className="card">
