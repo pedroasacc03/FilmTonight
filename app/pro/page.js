@@ -68,7 +68,7 @@ export default async function ProPage() {
               Free right now - beta access
             </span>
             <ul>
-              <li>{getEnergyCeiling("pro")} energy a day - marketed as &quot;Unlimited&quot; since real use rarely if ever hits it</li>
+              <li>{getEnergyCeiling("pro")} energy a day - double what Free gets</li>
               <li>Everything in Free</li>
             </ul>
           </div>

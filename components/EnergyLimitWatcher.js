@@ -187,7 +187,7 @@ export default function EnergyLimitWatcher() {
           <>
             <h3 style={{ marginTop: 0 }}>You&apos;re in!</h3>
             <p style={{ marginBottom: 20 }}>
-              You now have beta Pro — {grantedCeiling ?? 7} actions a day (recommendation batches, chat messages,
+              You now have beta Pro — {grantedCeiling ?? 8} actions a day (recommendation batches, chat messages,
               and Surprise Me picks combined), completely free. There&apos;s no real Pro subscription to buy yet -
               this free access is what &quot;Pro&quot; means right now, and there&apos;s nothing automatic that
               expires or revokes it.
